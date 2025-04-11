@@ -1,86 +1,94 @@
-//
-//  ContentView.swift
-//  souvenir
-//
-//  Created by Erick Barcelos on 26/08/24.
-//
-
 import SwiftUI
-import CoreData
+import PhotosUI
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
+    @State private var photos: [UIImage] = []
+    @State private var isPhotoCaptureViewPresented = false
+    @State private var selectedItem: PhotosPickerItem? = nil
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+            ZStack {
+                VStack {
+                    if photos.isEmpty {
+                        Text("No photos yet")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                            .padding()
+                    } else {
+                        ScrollView {
+                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
+                                ForEach(photos.indices, id: \.self) { index in
+                                    Image(uiImage: photos[index])
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 100, height: 100)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                }
+                            }
+                            .padding()
+                        }
                     }
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+
+                VStack {
+                    Spacer()
+                    Button(action: {
+                        isPhotoCaptureViewPresented = true
+                    }) {
+                        Circle()
+                            .fill(Color.blue)
+                            .frame(width: 70, height: 70)
+                            .overlay(
+                                Image(systemName: "camera.fill")
+                                    .foregroundColor(.white)
+                                    .font(.system(size: 30))
+                            )
+                            .shadow(radius: 5)
+                    }
+                    .padding(.bottom, 30)
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+            }
+            .navigationTitle("My Photos")
+            .navigationBarItems(trailing: PhotosPicker(
+                selection: $selectedItem,
+                matching: .images,
+                photoLibrary: .shared()
+            ) {
+                Image(systemName: "plus")
+                    .font(.title)
+            })
+            .onChange(of: selectedItem) { newItem in
+                Task {
+                    if let data = try? await newItem?.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        photos.append(uiImage)
+                        savePhotos()
                     }
                 }
             }
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            .onAppear {
+                loadPhotos()
+            }
+            .sheet(isPresented: $isPhotoCaptureViewPresented) {
+                PhotoCaptureView(onPhotoCaptured: { photo in
+                    photos.append(photo)
+                    savePhotos()
+                })
             }
         }
     }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
+    // Save photos to UserDefaults
+    func savePhotos() {
+        let data = photos.compactMap { $0.jpegData(compressionQuality: 0.8) }
+        UserDefaults.standard.set(data, forKey: "savedPhotos")
+    }
 
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
+    // Load photos from UserDefaults
+    func loadPhotos() {
+        if let data = UserDefaults.standard.array(forKey: "savedPhotos") as? [Data] {
+            photos = data.compactMap { UIImage(data: $0) }
         }
     }
-}
-
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
-
-#Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
