@@ -1,12 +1,16 @@
 import SwiftUI
 import CoreImage
 import CoreImage.CIFilterBuiltins
-import PhotosUI
 
 struct PhotoEditorView: View {
     @State private var image: UIImage?
     @State private var filteredImage: UIImage?
-    @State private var selectedItem: PhotosPickerItem? = nil
+    @State private var zoomScale: CGFloat = 1.0
+    @State private var lastZoomScale: CGFloat = 1.0
+
+    init(photo: UIImage) {
+        _image = State(initialValue: photo)
+    }
 
     var body: some View {
         VStack(spacing: 20) {
@@ -15,6 +19,17 @@ struct PhotoEditorView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(maxHeight: 300)
+                    .scaleEffect(zoomScale)
+                    .gesture(
+                        MagnificationGesture()
+                            .onChanged { value in
+                                let newScale = lastZoomScale * value
+                                zoomScale = min(max(newScale, 1.0), 3.0) // adjust limits as needed
+                            }
+                            .onEnded { _ in
+                                lastZoomScale = zoomScale
+                            }
+                    )
                     .clipShape(RoundedRectangle(cornerRadius: 15))
                     .shadow(radius: 5)
             } else if let original = image {
@@ -22,6 +37,17 @@ struct PhotoEditorView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(maxHeight: 300)
+                    .scaleEffect(zoomScale)
+                    .gesture(
+                        MagnificationGesture()
+                            .onChanged { value in
+                                let newScale = lastZoomScale * value
+                                zoomScale = min(max(newScale, 1.0), 3.0)
+                            }
+                            .onEnded { _ in
+                                lastZoomScale = zoomScale
+                            }
+                    )
                     .clipShape(RoundedRectangle(cornerRadius: 15))
                     .shadow(radius: 5)
             } else {
@@ -30,45 +56,19 @@ struct PhotoEditorView: View {
                     .foregroundColor(.gray)
             }
 
-            HStack {
-                PhotosPicker(
-                    selection: $selectedItem,
-                    matching: .images,
-                    photoLibrary: .shared()
-                ) {
-                    Text("Selecionar Foto")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.green)
-                        .cornerRadius(10)
-                        .shadow(radius: 5)
+            Button(action: {
+                if let original = image {
+                    applyFilter(to: original)
                 }
-                .onChange(of: selectedItem) { newItem in
-                    Task {
-                        if let data = try? await newItem?.loadTransferable(type: Data.self),
-                           let uiImage = UIImage(data: data) {
-                            image = uiImage
-                            saveImageToUserDefaults(uiImage)
-                        }
-                    }
-                }
-
-                Button(action: {
-                    if let original = image {
-                        applyFilter(to: original)
-                    }
-                }) {
-                    Text("Aplicar Filtro")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                        .shadow(radius: 5)
-                }
+            }) {
+                Text("Aplicar Filtro")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.blue)
+                    .cornerRadius(10)
+                    .shadow(radius: 5)
             }
         }
         .padding()
@@ -76,9 +76,6 @@ struct PhotoEditorView: View {
         .cornerRadius(15)
         .shadow(radius: 10)
         .padding()
-        .onAppear {
-            loadImageFromUserDefaults()
-        }
     }
 
     func applyFilter(to inputImage: UIImage) {
@@ -90,19 +87,6 @@ struct PhotoEditorView: View {
         if let outputImage = filter.outputImage,
            let cgImage = context.createCGImage(outputImage, from: outputImage.extent) {
             filteredImage = UIImage(cgImage: cgImage)
-        }
-    }
-
-    func saveImageToUserDefaults(_ image: UIImage) {
-        if let data = image.jpegData(compressionQuality: 0.8) {
-            UserDefaults.standard.set(data, forKey: "savedImage")
-        }
-    }
-
-    func loadImageFromUserDefaults() {
-        if let data = UserDefaults.standard.data(forKey: "savedImage"),
-           let savedImage = UIImage(data: data) {
-            image = savedImage
         }
     }
 }

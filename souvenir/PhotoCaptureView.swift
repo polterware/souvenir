@@ -28,7 +28,7 @@ struct PhotoCaptureView: View {
                 .padding(.bottom, 30)
             }
         }
-        .onChange(of: capturedImage) { newImage in
+        .onChange(of: capturedImage) { _, newImage in
             if let image = newImage {
                 onPhotoCaptured(image)
             }

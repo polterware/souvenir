@@ -1,6 +1,11 @@
 import SwiftUI
 import PhotosUI
 
+struct IdentifiableImage: Identifiable {
+    let id = UUID()
+    let image: UIImage
+}
+
 struct ContentView: View {
     @State private var photos: [UIImage] = []
     @State private var isPhotoCaptureViewPresented = false
@@ -19,11 +24,13 @@ struct ContentView: View {
                         ScrollView {
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
                                 ForEach(photos.indices, id: \.self) { index in
-                                    Image(uiImage: photos[index])
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 100, height: 100)
-                                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    NavigationLink(destination: PhotoEditorView(photo: photos[index])) {
+                                        Image(uiImage: photos[index])
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 100, height: 100)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    }
                                 }
                             }
                             .padding()
@@ -58,7 +65,7 @@ struct ContentView: View {
                 Image(systemName: "plus")
                     .font(.title)
             })
-            .onChange(of: selectedItem) { newItem in
+            .onChange(of: selectedItem) { _, newItem in
                 Task {
                     if let data = try? await newItem?.loadTransferable(type: Data.self),
                        let uiImage = UIImage(data: data) {
@@ -76,6 +83,7 @@ struct ContentView: View {
                     savePhotos()
                 })
             }
+
         }
     }
 
