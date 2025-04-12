@@ -3,25 +3,20 @@ import PhotosUI
 
 struct ContentView: View {
     @State private var photos: [UIImage] = []
-    @State private var isPhotoCaptureViewPresented = false
+    @State private var showCamera = false
     
-    // Em vez de um único item:
-    // @State private var selectedItem: PhotosPickerItem? = nil
-    
-    // Agora guardamos vários itens:
     @State private var selectedItems: [PhotosPickerItem] = []
     
     @Namespace private var ns
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 PhotosScrollView(photos: $photos,
-                                 // Em vez de selectedItem: $selectedItem
                                  selectedItems: $selectedItems,
                                  ns: ns)
-                CameraButtonView {
-                    isPhotoCaptureViewPresented = true
+                CameraButtonView(ns: ns) {
+                    showCamera = true
                 }
             }
             .navigationTitle("Gallery")
@@ -39,20 +34,23 @@ struct ContentView: View {
             .onAppear {
                 loadPhotos()
             }
-            .sheet(isPresented: $isPhotoCaptureViewPresented) {
+            .navigationDestination(isPresented: $showCamera) {
                 PhotoCaptureView(onPhotoCaptured: { photo in
                     photos.append(photo)
                     savePhotos()
                 })
+                .navigationTransition(
+                    .zoom(
+                        sourceID: "camera",
+                        in: ns
+                    )
+                )
             }
         }
     }
 
-    // ScrollView/ LazyVGrid
     private struct PhotosScrollView: View {
         @Binding var photos: [UIImage]
-        
-        // Em vez de @Binding var selectedItem: PhotosPickerItem?
         @Binding var selectedItems: [PhotosPickerItem]
 
         var ns: Namespace.ID
@@ -67,10 +65,8 @@ struct ContentView: View {
                 } else {
                     ScrollView {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
-                            
-                            // Note que agora usamos selection: $selectedItems
                             PhotosPicker(selection: $selectedItems,
-                                         maxSelectionCount: 5, // ou outro limite que desejar
+                                         maxSelectionCount: 5,
                                          matching: .images) {
                                 RoundedRectangle(cornerRadius: 8)
                                     .fill(Color(UIColor.systemGray5))
@@ -96,6 +92,7 @@ struct ContentView: View {
     }
 
     private struct CameraButtonView: View {
+        let ns: Namespace.ID
         var action: () -> Void
 
         var body: some View {
@@ -111,6 +108,7 @@ struct ContentView: View {
                                 .font(.system(size: 30))
                         )
                         .shadow(radius: 5)
+                        .matchedTransitionSource(id: "camera", in: ns)
                 }
                 .padding(.bottom, 30)
             }
