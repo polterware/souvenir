@@ -80,8 +80,10 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         previewLayer.frame = view.layer.bounds
         view.layer.addSublayer(previewLayer)
 
-        captureSession.startRunning()
-
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.captureSession.startRunning()
+        }
+        
         NotificationCenter.default.addObserver(self, selector: #selector(capturePhoto), name: .capturePhoto, object: nil)
     }
 

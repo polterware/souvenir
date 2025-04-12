@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var photos: [UIImage] = []
     @State private var isPhotoCaptureViewPresented = false
     @State private var selectedItem: PhotosPickerItem? = nil
+    @Namespace private var ns
 
     var body: some View {
         NavigationView {
@@ -24,12 +25,17 @@ struct ContentView: View {
                         ScrollView {
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
                                 ForEach(photos.indices, id: \.self) { index in
-                                    NavigationLink(destination: PhotoEditorView(photo: photos[index])) {
+                                    NavigationLink {
+                                        PhotoEditorView(photo: photos[index])
+                                            .navigationTransition(.zoom(sourceID: "photo_\(index)", in: ns))
+                                            .matchedTransitionDestination(id: "photo_\(index)", in: ns)
+                                    } label: {
                                         Image(uiImage: photos[index])
                                             .resizable()
                                             .scaledToFill()
                                             .frame(width: 100, height: 100)
                                             .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            .matchedTransitionSource(id: "photo_\(index)", in: ns)
                                     }
                                 }
                             }
