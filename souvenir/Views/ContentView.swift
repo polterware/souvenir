@@ -100,14 +100,14 @@ struct ContentView: View {
                 Spacer()
                 Button(action: action) {
                     Circle()
-                        .fill(Color.blue)
+                        .fill(Color(UIColor.systemGray))
                         .frame(width: 70, height: 70)
                         .overlay(
-                            Image(systemName: "camera.fill")
+                            Image(systemName: "eye.fill")
                                 .foregroundColor(.white)
-                                .font(.system(size: 30))
+                                .font(.system(size: 20))
                         )
-                        .shadow(radius: 5)
+
                         .matchedTransitionSource(id: "camera", in: ns)
                 }
                 .padding(.bottom, 30)

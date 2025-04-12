@@ -5,6 +5,8 @@ struct PhotoCaptureView: View {
     var onPhotoCaptured: (UIImage) -> Void
     @State private var capturedImage: UIImage? = nil
     @State private var isPhotoTaken: Bool = false
+    @Environment(\.presentationMode) var presentationMode
+    
 
     var body: some View {
         ZStack {
@@ -12,6 +14,19 @@ struct PhotoCaptureView: View {
                 .edgesIgnoringSafeArea(.all)
 
             VStack {
+                HStack {
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        HStack {
+                            Image(systemName: "xmark")
+                        }
+                        .modifier(BoxBlankStyle(cornerRadius: .infinity))
+                    }
+                    .padding()
+
+                    Spacer()
+                }
                 Spacer()
                 Button(action: {
                     NotificationCenter.default.post(name: .capturePhoto, object: nil)
@@ -28,6 +43,7 @@ struct PhotoCaptureView: View {
                 .padding(.bottom, 30)
             }
         }
+        .navigationBarBackButtonHidden(true)
         .onChange(of: capturedImage) { _, newImage in
             if let image = newImage {
                 onPhotoCaptured(image)
@@ -111,4 +127,10 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 
 extension Notification.Name {
     static let capturePhoto = Notification.Name("capturePhoto")
+}
+
+
+
+#Preview {
+    PhotoCaptureView(onPhotoCaptured: { _ in })
 }
