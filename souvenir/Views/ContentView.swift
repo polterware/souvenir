@@ -25,18 +25,7 @@ struct ContentView: View {
                         ScrollView {
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
                                 ForEach(photos.indices, id: \.self) { index in
-                                    NavigationLink {
-                                        PhotoEditorView(photo: photos[index])
-                                            .navigationTransition(.zoom(sourceID: "photo_\(index)", in: ns))
-                                            .matchedTransitionDestination(id: "photo_\(index)", in: ns)
-                                    } label: {
-                                        Image(uiImage: photos[index])
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 100, height: 100)
-                                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                                            .matchedTransitionSource(id: "photo_\(index)", in: ns)
-                                    }
+                                    PhotoGridItem(photo: photos[index], index: index, ns: ns)
                                 }
                             }
                             .padding()

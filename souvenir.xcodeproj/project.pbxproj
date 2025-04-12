@@ -3,14 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2C943CA22DA99A260085FA15 /* PhotoEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C943CA12DA99A1C0085FA15 /* PhotoEditorView.swift */; };
-		2C943CA42DA99A330085FA15 /* PhotoCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C943CA32DA99A320085FA15 /* PhotoCaptureView.swift */; };
 		2CB568AA2C7CB9B50027924C /* souvenirApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB568A92C7CB9B50027924C /* souvenirApp.swift */; };
-		2CB568AC2C7CB9B50027924C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB568AB2C7CB9B50027924C /* ContentView.swift */; };
 		2CB568AE2C7CB9B70027924C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CB568AD2C7CB9B70027924C /* Assets.xcassets */; };
 		2CB568B12C7CB9B70027924C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CB568B02C7CB9B70027924C /* Preview Assets.xcassets */; };
 		2CB568B32C7CB9B70027924C /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB568B22C7CB9B70027924C /* Persistence.swift */; };
@@ -42,12 +39,9 @@
 
 /* Begin PBXFileReference section */
 		11C35E79733F0AA1FCEA9266 /* Pods-souvenir-souvenirUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-souvenir-souvenirUITests.release.xcconfig"; path = "Target Support Files/Pods-souvenir-souvenirUITests/Pods-souvenir-souvenirUITests.release.xcconfig"; sourceTree = "<group>"; };
-		2C943CA12DA99A1C0085FA15 /* PhotoEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoEditorView.swift; sourceTree = "<group>"; };
-		2C943CA32DA99A320085FA15 /* PhotoCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureView.swift; sourceTree = "<group>"; };
 		2C943CA52DA99B870085FA15 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		2CB568A62C7CB9B50027924C /* souvenir.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = souvenir.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CB568A92C7CB9B50027924C /* souvenirApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = souvenirApp.swift; sourceTree = "<group>"; };
-		2CB568AB2C7CB9B50027924C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		2CB568AD2C7CB9B70027924C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2CB568B02C7CB9B70027924C /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		2CB568B22C7CB9B70027924C /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
@@ -66,6 +60,10 @@
 		DC3718D6BFD298EDDE54C490 /* Pods-souvenirTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-souvenirTests.debug.xcconfig"; path = "Target Support Files/Pods-souvenirTests/Pods-souvenirTests.debug.xcconfig"; sourceTree = "<group>"; };
 		E5BE1D86E15D5361C43CF877 /* Pods-souvenir.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-souvenir.release.xcconfig"; path = "Target Support Files/Pods-souvenir/Pods-souvenir.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		2C5C549D2DAAC16C003F5A61 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		2CB568A32C7CB9B50027924C /* Frameworks */ = {
@@ -133,11 +131,9 @@
 		2CB568A82C7CB9B50027924C /* souvenir */ = {
 			isa = PBXGroup;
 			children = (
+				2C5C549D2DAAC16C003F5A61 /* Views */,
 				2C943CA52DA99B870085FA15 /* Info.plist */,
-				2C943CA32DA99A320085FA15 /* PhotoCaptureView.swift */,
-				2C943CA12DA99A1C0085FA15 /* PhotoEditorView.swift */,
 				2CB568A92C7CB9B50027924C /* souvenirApp.swift */,
-				2CB568AB2C7CB9B50027924C /* ContentView.swift */,
 				2CB568AD2C7CB9B70027924C /* Assets.xcassets */,
 				2CB568B22C7CB9B70027924C /* Persistence.swift */,
 				2CB568B42C7CB9B70027924C /* souvenir.xcdatamodeld */,
@@ -196,6 +192,9 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				2C5C549D2DAAC16C003F5A61 /* Views */,
 			);
 			name = souvenir;
 			productName = souvenir;
@@ -385,10 +384,7 @@
 			files = (
 				2CB568B62C7CB9B70027924C /* souvenir.xcdatamodeld in Sources */,
 				2CB568B32C7CB9B70027924C /* Persistence.swift in Sources */,
-				2CB568AC2C7CB9B50027924C /* ContentView.swift in Sources */,
 				2CB568AA2C7CB9B50027924C /* souvenirApp.swift in Sources */,
-				2C943CA42DA99A330085FA15 /* PhotoCaptureView.swift in Sources */,
-				2C943CA22DA99A260085FA15 /* PhotoEditorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -566,6 +562,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -601,6 +598,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
