@@ -17,82 +17,117 @@ struct PhotoEditorView: View {
     }
 
     var body: some View {
-        VStack(spacing: 20) {
-            if let filtered = filteredImage {
-                Image(uiImage: filtered)
-                    .resizable()
-                    .scaledToFit()
-                    .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
-                    .frame(maxHeight: 300)
-                    .scaleEffect(zoomScale)
-                    .gesture(
-                        MagnificationGesture()
-                            .onChanged { value in
-                                let newScale = lastZoomScale * value
-                                zoomScale = min(max(newScale, 1.0), 3.0) // adjust limits as needed
-                            }
-                            .onEnded { _ in
-                                lastZoomScale = zoomScale
-                            }
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 15))
-                    .shadow(radius: 5)
-            } else if let original = image {
-                Image(uiImage: original)
-                    .resizable()
-                    .scaledToFit()
-                    .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
-                    .frame(maxHeight: 300)
-                    .scaleEffect(zoomScale)
-                    .gesture(
-                        MagnificationGesture()
-                            .onChanged { value in
-                                let newScale = lastZoomScale * value
-                                zoomScale = min(max(newScale, 1.0), 3.0)
-                            }
-                            .onEnded { _ in
-                                lastZoomScale = zoomScale
-                            }
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 15))
-                    .shadow(radius: 5)
-            } else {
-                Text("Carregue ou selecione uma imagem para editar")
-                    .font(.headline)
-                    .foregroundColor(.gray)
-            }
-
-            Button(action: {
-                if let original = image {
-                    applyFilter(to: original)
+        GeometryReader { geometry in
+            VStack(spacing: 20) {
+                // Image display area occupies ~75% of the available height
+                Group {
+                    if let filtered = filteredImage {
+                        Image(uiImage: filtered)
+                            .resizable()
+                            .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
+                            .scaledToFit()
+                            .scaleEffect(zoomScale)
+                            .gesture(
+                                MagnificationGesture()
+                                    .onChanged { value in
+                                        let newScale = lastZoomScale * value
+                                        zoomScale = min(max(newScale, 1.0), 3.0)
+                                    }
+                                    .onEnded { _ in
+                                        lastZoomScale = zoomScale
+                                    }
+                            )
+                    } else if let original = image {
+                        Image(uiImage: original)
+                            .resizable()
+                            .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
+                            .scaledToFit()
+                            .scaleEffect(zoomScale)
+                            .gesture(
+                                MagnificationGesture()
+                                    .onChanged { value in
+                                        let newScale = lastZoomScale * value
+                                        zoomScale = min(max(newScale, 1.0), 3.0)
+                                    }
+                                    .onEnded { _ in
+                                        lastZoomScale = zoomScale
+                                    }
+                            )
+                    } else {
+                        Text("Carregue ou selecione uma imagem para editar")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                    }
                 }
-            }) {
-                Text("Aplicar Filtro")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .cornerRadius(10)
-                    .shadow(radius: 5)
+                .frame(height: geometry.size.height * 0.75)
+                
+
+                // Horizontal scroll view for filter effects occupying ~15% of height
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 15) {
+                        Button("Sepia") {
+                            applyFilter(filterName: "sepia")
+                        }
+                        .padding()
+                        .background(Color.blue.opacity(0.7))
+                        .cornerRadius(8)
+                        .foregroundColor(.white)
+
+                        Button("Noir") {
+                            applyFilter(filterName: "noir")
+                        }
+                        .padding()
+                        .background(Color.blue.opacity(0.7))
+                        .cornerRadius(8)
+                        .foregroundColor(.white)
+
+                        Button("Invert") {
+                            applyFilter(filterName: "invert")
+                        }
+                        .padding()
+                        .background(Color.blue.opacity(0.7))
+                        .cornerRadius(8)
+                        .foregroundColor(.white)
+                    }
+                    .padding(.horizontal)
+                }
+                .frame(height: geometry.size.height * 0.15)
             }
+            
         }
-        .padding()
-        .background(Color(UIColor.systemGroupedBackground))
-        .cornerRadius(15)
-        .shadow(radius: 10)
-        .padding()
     }
 
-    func applyFilter(to inputImage: UIImage) {
+    // New applyFilter method that applies different effects based on the filterName
+    func applyFilter(filterName: String) {
+        guard let inputImage = image else { return }
         let context = CIContext()
-        let filter = CIFilter.sepiaTone()
-        filter.inputImage = CIImage(image: inputImage)
-        filter.intensity = 0.8
+        var outputImage: CIImage?
 
-        if let outputImage = filter.outputImage,
+        switch filterName {
+        case "sepia":
+            let filter = CIFilter.sepiaTone()
+            filter.inputImage = CIImage(image: inputImage)
+            filter.intensity = 0.8
+            outputImage = filter.outputImage
+        case "noir":
+            let filter = CIFilter.photoEffectNoir()
+            filter.inputImage = CIImage(image: inputImage)
+            outputImage = filter.outputImage
+        case "invert":
+            let filter = CIFilter.colorInvert()
+            filter.inputImage = CIImage(image: inputImage)
+            outputImage = filter.outputImage
+        default:
+            outputImage = CIImage(image: inputImage)
+        }
+
+        if let outputImage = outputImage,
            let cgImage = context.createCGImage(outputImage, from: outputImage.extent) {
             filteredImage = UIImage(cgImage: cgImage)
         }
     }
+}
+
+#Preview{
+    ContentView()
 }

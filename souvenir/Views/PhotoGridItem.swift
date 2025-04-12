@@ -15,7 +15,7 @@ struct PhotoGridItem: View {
     var body: some View {
         NavigationLink {
             PhotoEditorView(photo: photo, namespace: ns, matchedID: "photo_\(index)")
-                .navigationTransition(.zoom(sourceID: "photo_\(index)", in: ns))
+                
         } label: {
             Image(uiImage: photo)
                 .resizable()
