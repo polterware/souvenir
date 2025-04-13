@@ -8,7 +8,7 @@ struct ContentView: View {
     @State private var selectedItems: [PhotosPickerItem] = []
 
     // Variável para armazenar o índice da foto que será editada
-    @State private var selectedPhotoIndexForEditor: Int? = nil
+    @State private var selectedPhotoForEditor: UIImage? = nil
 
     @Namespace private var ns
 
@@ -19,8 +19,9 @@ struct ContentView: View {
                                  selectedItems: $selectedItems,
                                  ns: ns,
                                  onPhotoSelected: { index in
-                                     navigateToPhotoEditor(photoIndex: index)
+                                     navigateToPhotoEditor(photo: photos[index])
                                  })
+                
                 CameraButtonView(ns: ns) {
                     showCamera = true
                 }
@@ -54,22 +55,20 @@ struct ContentView: View {
                 )
             }
             // Navegação para o editor de fotos (quando selectedPhotoIndexForEditor não for nil)
-            .navigationDestination(item: $selectedPhotoIndexForEditor) { photoIndex in
-                // Ajuste o PhotoEditorView conforme a sua implementação
-                if photoIndex < photos.count {
-                    PhotoEditorView(photo: photos[photoIndex],
-                                    namespace: ns,
-                                    matchedID: "photo_\(photoIndex)")
-                } else {
-                    Text("Foto não encontrada")
+            .navigationDestination(isPresented: Binding<Bool>( // Crie um binding a partir de selectedPhotoForEditor
+                get: { selectedPhotoForEditor != nil },
+                set: { if !$0 { selectedPhotoForEditor = nil } }
+            )) {
+                if let photo = selectedPhotoForEditor {
+                    PhotoEditorView(photo: photo, namespace: ns, matchedID: /* algo */ "")
                 }
             }
         }
     }
 
     /// Função que inicia a navegação para o editor de fotos
-    func navigateToPhotoEditor(photoIndex: Int) {
-        selectedPhotoIndexForEditor = photoIndex
+    func navigateToPhotoEditor(photo: UIImage) {
+        selectedPhotoForEditor = photo
     }
 
     // ScrollView que exibe e seleciona fotos
