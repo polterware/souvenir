@@ -110,29 +110,22 @@ struct ContentView: View {
                                     photo: photos[index],
                                     index: index,
                                     ns: ns,
-                                    isSelected: selectedPhotoIndices.contains(index)
-                                )
-                                // Toque longo para iniciar (ou expandir) o modo de seleção
-                                .highPriorityGesture(
-                                    LongPressGesture(minimumDuration: 0.5)
-                                        .onEnded { _ in
-                                            let generator = UIImpactFeedbackGenerator(style: .medium)
-                                            generator.impactOccurred()
-
-                                            _ = withAnimation {
-                                                selectedPhotoIndices.insert(index)
-                                            }
+                                    isSelected: selectedPhotoIndices.contains(index),
+                                    onLongPress: {
+                                        let generator = UIImpactFeedbackGenerator(style: .medium)
+                                        generator.impactOccurred()
+                                        _ = withAnimation {
+                                            selectedPhotoIndices.insert(index)
                                         }
+                                    }
                                 )
-                                // Toque simples para navegar ou alternar seleção
                                 .simultaneousGesture(
                                     TapGesture()
                                         .onEnded {
                                             if selectedPhotoIndices.isEmpty {
                                                 onPhotoSelected(index)
                                             } else {
-                                                // Se já estiver no modo de seleção, alterna o item
-                                                withAnimation {
+                                                 withAnimation {
                                                     if selectedPhotoIndices.contains(index) {
                                                         selectedPhotoIndices.remove(index)
                                                     } else {
@@ -142,8 +135,7 @@ struct ContentView: View {
                                             }
                                         }
                                 )
-                            }
-                        }
+                            }                        }
                         .padding()
                         .padding(.bottom, 120)
                     }
@@ -209,21 +201,37 @@ struct PhotoGridItem: View {
     let index: Int
     let ns: Namespace.ID
     let isSelected: Bool
+    var onLongPress: () -> Void
+
+    @GestureState private var isPressed: Bool = false
 
     var body: some View {
-        ZStack {
+        // Cria o gesto de long press com atualização do estado para efeito de escala
+        let longPressGesture = LongPressGesture(minimumDuration: 0.5)
+            .updating($isPressed) { value, state, _ in
+                state = value
+            }
+            .onEnded { _ in
+                onLongPress()
+            }
+
+        return ZStack {
             Image(uiImage: photo)
                 .resizable()
                 .scaledToFill()
                 .frame(width: 100, height: 100)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
+                // Aplica o efeito de escala conforme o estado da gesture (scale-95)
+                .scaleEffect(isPressed ? 0.95 : 1.0)
+                .animation(.easeInOut(duration: 0.2), value: isPressed)
                 .matchedTransitionSource(id: "photo_\(index)", in: ns)
 
-            // Borda que indica seleção
+            // Borda para indicar seleção
             RoundedRectangle(cornerRadius: 8)
                 .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 3)
                 .frame(width: 100, height: 100)
         }
+        .gesture(longPressGesture)
     }
 }
 
