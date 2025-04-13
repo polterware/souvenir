@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2CA967D42DAB8DAE002C6D35 /* FluidGradient in Frameworks */ = {isa = PBXBuildFile; productRef = 2CA967D32DAB8DAE002C6D35 /* FluidGradient */; };
 		2CB568AA2C7CB9B50027924C /* souvenirApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB568A92C7CB9B50027924C /* souvenirApp.swift */; };
 		2CB568AE2C7CB9B70027924C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CB568AD2C7CB9B70027924C /* Assets.xcassets */; };
 		2CB568B12C7CB9B70027924C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CB568B02C7CB9B70027924C /* Preview Assets.xcassets */; };
@@ -71,6 +72,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				77334B806A41780F0F4E981A /* Pods_souvenir.framework in Frameworks */,
+				2CA967D42DAB8DAE002C6D35 /* FluidGradient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,6 +273,9 @@
 				Base,
 			);
 			mainGroup = 2CB5689D2C7CB9B50027924C;
+			packageReferences = (
+				2C5C54A42DAB8C3E003F5A61 /* XCRemoteSwiftPackageReference "FluidGradient" */,
+			);
 			productRefGroup = 2CB568A72C7CB9B50027924C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -732,6 +737,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2C5C54A42DAB8C3E003F5A61 /* XCRemoteSwiftPackageReference "FluidGradient" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Cindori/FluidGradient";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2CA967D32DAB8DAE002C6D35 /* FluidGradient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2C5C54A42DAB8C3E003F5A61 /* XCRemoteSwiftPackageReference "FluidGradient" */;
+			productName = FluidGradient;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		2CB568B42C7CB9B70027924C /* souvenir.xcdatamodeld */ = {

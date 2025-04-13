@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import FluidGradient
 
 struct ContentView: View {
     @State private var photos: [UIImage] = []
@@ -99,16 +100,21 @@ struct ContentView: View {
             VStack {
                 Spacer()
                 Button(action: action) {
-                    Circle()
-                        .fill(Color(UIColor.systemGray))
-                        .frame(width: 70, height: 70)
-                        .overlay(
-                            Image(systemName: "eye.fill")
-                                .foregroundColor(.white)
-                                .font(.system(size: 20))
+                    ZStack {
+                        FluidGradient(
+                            blobs: [.blue, .cyan, .purple, .pink],
+                            speed: 1.0,
+                            blur: 0.7
                         )
+                        .background(.ultraThinMaterial)
+                        .frame(width: 70, height: 70)
+                        .cornerRadius(.infinity)
 
-                        .matchedTransitionSource(id: "camera", in: ns)
+                        Image(systemName: "eye.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 20))
+                    }
+                    .matchedTransitionSource(id: "camera", in: ns)
                 }
                 .padding(.bottom, 30)
             }

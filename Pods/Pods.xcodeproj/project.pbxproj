@@ -36,22 +36,22 @@
 		3ADAEE735605B67C4E183779A154EBEA /* Pods-souvenir-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-souvenir-acknowledgements.markdown"; sourceTree = "<group>"; };
 		453742D27C5A215537FFF9E1EE995FD9 /* Pods-souvenir-souvenirUITests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-souvenir-souvenirUITests-acknowledgements.plist"; sourceTree = "<group>"; };
 		538AF09E733D1C47B1CA2083B1D1DBC6 /* Pods-souvenirTests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-souvenirTests-dummy.m"; sourceTree = "<group>"; };
-		57E16FEE1374474BAA0FB594A0F93E7C /* Pods-souvenir-souvenirUITests */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-souvenir-souvenirUITests"; path = Pods_souvenir_souvenirUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		57E16FEE1374474BAA0FB594A0F93E7C /* Pods_souvenir_souvenirUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_souvenir_souvenirUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6E3918EA74267E512AB6CB345FEA8993 /* Pods-souvenir-souvenirUITests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-souvenir-souvenirUITests-umbrella.h"; sourceTree = "<group>"; };
 		73010CC983E3809BECEE5348DA1BB8C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		746257B73843AEF0823F296E06E7B517 /* Pods-souvenir.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-souvenir.release.xcconfig"; sourceTree = "<group>"; };
-		78C6AF3CF26BEA27FD26F8EB9802EF30 /* Pods-souvenirTests */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-souvenirTests"; path = Pods_souvenirTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		78C6AF3CF26BEA27FD26F8EB9802EF30 /* Pods_souvenirTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_souvenirTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7CA14697B43EDBABEC8132D2744645F7 /* Pods-souvenir-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-souvenir-Info.plist"; sourceTree = "<group>"; };
 		818F559370A4C854328488CA02DC7435 /* Pods-souvenirTests-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-souvenirTests-Info.plist"; sourceTree = "<group>"; };
 		831CE4310CC034848A5CE2BE44F1A6B6 /* Pods-souvenir-souvenirUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-souvenir-souvenirUITests.release.xcconfig"; sourceTree = "<group>"; };
 		866FC0D2F469841217578990F21F61CF /* Pods-souvenir-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-souvenir-umbrella.h"; sourceTree = "<group>"; };
 		888BB72D5BEAC938EFA986860AB4AD0A /* Pods-souvenirTests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-souvenirTests.modulemap"; sourceTree = "<group>"; };
-		8DA1835B423549CA5B3B954D8A6C7B78 /* Pods-souvenir */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-souvenir"; path = Pods_souvenir.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DA1835B423549CA5B3B954D8A6C7B78 /* Pods_souvenir.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_souvenir.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9410A959E3EF62F6124533E185D55FF9 /* Pods-souvenir-souvenirUITests-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-souvenir-souvenirUITests-Info.plist"; sourceTree = "<group>"; };
 		9AE513B75F6E7CEB7C4A8815AD093C2A /* Pods-souvenir-souvenirUITests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-souvenir-souvenirUITests-dummy.m"; sourceTree = "<group>"; };
 		9D135A092E8686C69837E86AB4ABBCBB /* Pods-souvenir-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-souvenir-dummy.m"; sourceTree = "<group>"; };
 		9D2CD92466659A9BCDEF8EF4B9862B26 /* Pods-souvenirTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-souvenirTests.release.xcconfig"; sourceTree = "<group>"; };
-		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		ADD653936614AE6E789FFB2602671A86 /* Pods-souvenirTests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-souvenirTests-acknowledgements.plist"; sourceTree = "<group>"; };
 		B1FAA9B13D83FBB2D1D9BDD0F5B180FA /* Pods-souvenirTests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-souvenirTests-acknowledgements.markdown"; sourceTree = "<group>"; };
 		B9E0CB4AB81D70EC01643220659ED52F /* Pods-souvenirTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-souvenirTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -141,9 +141,9 @@
 		781A22561C265D903EAE9C0601558E4D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DA1835B423549CA5B3B954D8A6C7B78 /* Pods-souvenir */,
-				57E16FEE1374474BAA0FB594A0F93E7C /* Pods-souvenir-souvenirUITests */,
-				78C6AF3CF26BEA27FD26F8EB9802EF30 /* Pods-souvenirTests */,
+				8DA1835B423549CA5B3B954D8A6C7B78 /* Pods_souvenir.framework */,
+				57E16FEE1374474BAA0FB594A0F93E7C /* Pods_souvenir_souvenirUITests.framework */,
+				78C6AF3CF26BEA27FD26F8EB9802EF30 /* Pods_souvenirTests.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -227,7 +227,7 @@
 			);
 			name = "Pods-souvenir";
 			productName = Pods_souvenir;
-			productReference = 8DA1835B423549CA5B3B954D8A6C7B78 /* Pods-souvenir */;
+			productReference = 8DA1835B423549CA5B3B954D8A6C7B78 /* Pods_souvenir.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		D49EAA611A98575A7693A9FA468A2DEC /* Pods-souvenirTests */ = {
@@ -246,7 +246,7 @@
 			);
 			name = "Pods-souvenirTests";
 			productName = Pods_souvenirTests;
-			productReference = 78C6AF3CF26BEA27FD26F8EB9802EF30 /* Pods-souvenirTests */;
+			productReference = 78C6AF3CF26BEA27FD26F8EB9802EF30 /* Pods_souvenirTests.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		FA73B3037E8D50E14718B0BD20895546 /* Pods-souvenir-souvenirUITests */ = {
@@ -264,7 +264,7 @@
 			);
 			name = "Pods-souvenir-souvenirUITests";
 			productName = Pods_souvenir_souvenirUITests;
-			productReference = 57E16FEE1374474BAA0FB594A0F93E7C /* Pods-souvenir-souvenirUITests */;
+			productReference = 57E16FEE1374474BAA0FB594A0F93E7C /* Pods_souvenir_souvenirUITests.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -285,6 +285,9 @@
 				en,
 			);
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
+			packageReferences = (
+				2C5C54A52DAB8C6B003F5A61 /* XCRemoteSwiftPackageReference "FluidGradient" */,
+			);
 			productRefGroup = 781A22561C265D903EAE9C0601558E4D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -750,6 +753,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2C5C54A52DAB8C6B003F5A61 /* XCRemoteSwiftPackageReference "FluidGradient" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Cindori/FluidGradient";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 	};
 	rootObject = BFDFE7DC352907FC980B868725387E98 /* Project object */;
 }
