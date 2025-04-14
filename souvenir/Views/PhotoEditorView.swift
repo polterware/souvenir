@@ -97,11 +97,9 @@ struct PhotoEditorView: View {
                                     }) {
                                         Image(systemName: editOptionIcon(for: option))
                                             .resizable()
-                                            .padding(10)
-                                            .background(Color.gray.opacity(0.2))
-                                            .cornerRadius(10)
+                                            .padding()
                                     }
-                                    .frame(width: 70, height: 70)
+                                    .modifier(BoxBlankStyle(cornerRadius: .infinity))
                                 }
                             } else if selectedCategory == "presets" {
                                 ForEach(["vintage", "vibrant", "minimal"], id: \.self) { preset in
