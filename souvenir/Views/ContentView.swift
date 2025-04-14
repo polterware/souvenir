@@ -203,35 +203,35 @@ struct PhotoGridItem: View {
     let isSelected: Bool
     var onLongPress: () -> Void
 
-    @GestureState private var isPressed: Bool = false
+    // Use @State para controlar o estado da animação (scale)
+    @State private var isPressed: Bool = false
 
     var body: some View {
-        // Cria o gesto de long press com atualização do estado para efeito de escala
-        let longPressGesture = LongPressGesture(minimumDuration: 0.5)
-            .updating($isPressed) { value, state, _ in
-                state = value
-            }
-            .onEnded { _ in
-                onLongPress()
-            }
-
-        return ZStack {
+        ZStack {
             Image(uiImage: photo)
                 .resizable()
                 .scaledToFill()
                 .frame(width: 100, height: 100)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
-                // Aplica o efeito de escala conforme o estado da gesture (scale-95)
+                // Aplica o efeito de escala enquanto estiver pressionada
                 .scaleEffect(isPressed ? 0.95 : 1.0)
                 .animation(.easeInOut(duration: 0.2), value: isPressed)
                 .matchedTransitionSource(id: "photo_\(index)", in: ns)
 
-            // Borda para indicar seleção
+            // Indica seleção com uma borda
             RoundedRectangle(cornerRadius: 8)
                 .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 3)
                 .frame(width: 100, height: 100)
         }
-        .gesture(longPressGesture)
+        // Utiliza o onLongPressGesture, que possui os parâmetros de duração e distância máxima.
+        // Se o usuário mover muito o dedo (para scrollar), a gesture é cancelada, permitindo o scroll.
+        .onLongPressGesture(minimumDuration: 0.5, maximumDistance: 10, pressing: { inProgress in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isPressed = inProgress
+            }
+        }, perform: {
+            onLongPress()
+        })
     }
 }
 
