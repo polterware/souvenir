@@ -9,7 +9,8 @@ struct ContentView: View {
 
     // Variável para armazenar o índice da foto que será editada
     @State private var selectedPhotoForEditor: UIImage? = nil
-
+    @State private var isSelectionActive: Bool = false
+    
     @Namespace private var ns
 
     var body: some View {
@@ -24,11 +25,16 @@ struct ContentView: View {
                     },
                     onPhotosChanged: {
                         savePhotos()
+                    },
+                    onSelectionChanged: { active in
+                        isSelectionActive = active
                     }
                 )
                 
-                CameraButtonView(ns: ns) {
-                    showCamera = true
+                if !isSelectionActive {
+                    CameraButtonView(ns: ns) {
+                        showCamera = true
+                    }
                 }
             }
             .navigationTitle("Gallery")
@@ -41,6 +47,7 @@ struct ContentView: View {
                         }
                     }
                     savePhotos()
+                    selectedItems.removeAll()
                 }
             }
             .onAppear {
@@ -86,6 +93,7 @@ struct ContentView: View {
         var ns: Namespace.ID
         var onPhotoSelected: (Int) -> Void
         var onPhotosChanged: () -> Void
+        var onSelectionChanged: (Bool) -> Void
 
         // Propriedade computada para acessar as fotos selecionadas
         var selectedPhotos: [UIImage] {
@@ -101,7 +109,7 @@ struct ContentView: View {
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
                         PhotosPicker(selection: $selectedItems,
-                                     maxSelectionCount: 5,
+                                     maxSelectionCount: 6,
                                      matching: .images) {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color(UIColor.systemGray5))
@@ -113,7 +121,21 @@ struct ContentView: View {
                                 )
                                 .frame(width: 100, height: 100)
                         }
-
+                        .contentShape(Rectangle())  // Área de toque é o retângulo inteiro
+                        .zIndex(1)                  // Fica “acima” dos itens da lista
+                        // Força o PhotosPicker a lidar primeiro com o toque, sem propagar para a foto
+                        .gesture(
+                            ExclusiveGesture(
+                                TapGesture().onEnded {
+                                    // Em branco, pois o PhotosPicker em si já trata o tap
+                                },
+                                LongPressGesture(minimumDuration: 0.3).onEnded { _ in
+                                    // Em branco, para “consumir” o long press
+                                }
+                            )
+                        )
+                        
+                        
                         ForEach(photos.indices, id: \.self) { index in
                             PhotoGridItem(
                                 photo: photos[index],
@@ -180,10 +202,14 @@ struct ContentView: View {
                     .padding()
                 }
             }
+            .onChange(of: selectedPhotoIndices) { _, newValue in
+                onSelectionChanged(!newValue.isEmpty)
+            }
             // Folha de compartilhamento
             .sheet(isPresented: $showShareSheet) {
                 ActivityView(activityItems: selectedPhotos)
             }
+            
         }
     }
 
