@@ -1,12 +1,14 @@
 import SwiftUI
 import AVFoundation
 
+import SwiftUI
+import AVFoundation
+
 struct PhotoCaptureView: View {
     var onPhotoCaptured: (UIImage) -> Void
     @State private var capturedImage: UIImage? = nil
     @State private var isPhotoTaken: Bool = false
     @Environment(\.presentationMode) var presentationMode
-    
 
     var body: some View {
         ZStack {
@@ -17,7 +19,6 @@ struct PhotoCaptureView: View {
                 )
                 .clipped()
                 .edgesIgnoringSafeArea(.all)
-
             VStack {
                 HStack {
                     Button(action: {
@@ -97,7 +98,7 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         }
 
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-        previewLayer.videoGravity = .resizeAspectFill
+        previewLayer.videoGravity = .resizeAspect
         previewLayer.frame = view.layer.bounds
         view.layer.addSublayer(previewLayer)
 
@@ -106,6 +107,11 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         }
         
         NotificationCenter.default.addObserver(self, selector: #selector(capturePhoto), name: .capturePhoto, object: nil)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        previewLayer.frame = view.bounds
     }
 
     @objc func capturePhoto() {
@@ -133,8 +139,6 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 extension Notification.Name {
     static let capturePhoto = Notification.Name("capturePhoto")
 }
-
-
 
 #Preview {
     PhotoCaptureView(onPhotoCaptured: { _ in })

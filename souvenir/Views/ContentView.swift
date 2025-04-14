@@ -262,7 +262,7 @@ struct PhotoGridItem: View {
                 .matchedTransitionSource(id: "photo_\(index)", in: ns)
 
             RoundedRectangle(cornerRadius: 8)
-                .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 3)
+                .stroke(isSelected ? Color.primary : Color.clear, lineWidth: 3)
                 .frame(width: 100, height: 100)
         }
         // Determina a área de toque completa, e unifica o onTap aqui
