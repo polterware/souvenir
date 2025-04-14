@@ -92,14 +92,23 @@ struct PhotoEditorView: View {
                                 }
                             } else if selectedCategory == "edit" {
                                 ForEach(["crop", "brightness", "contrast"], id: \.self) { option in
+
                                     Button(action: {
                                         // Adicione aqui a ação específica para a opção de edição, se necessário
                                     }) {
                                         Image(systemName: editOptionIcon(for: option))
                                             .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 20, height: 20)
                                             .padding()
                                     }
-                                    .modifier(BoxBlankStyle(cornerRadius: .infinity))
+                                    .modifier(
+                                        BoxBlankStyle(
+                                            cornerRadius: 10, size: 70
+                                        )
+                                    )
+                                    .frame(width: 70, height: 70)
+                                    
                                 }
                             } else if selectedCategory == "presets" {
                                 ForEach(["vintage", "vibrant", "minimal"], id: \.self) { preset in
