@@ -108,6 +108,7 @@ struct ContentView: View {
                 // Grid sempre exibida, com a célula do PhotosPicker (botão “+”) e as fotos existentes
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
+                        // Remover .zIndex(1) e ExclusiveGesture
                         PhotosPicker(selection: $selectedItems,
                                      maxSelectionCount: 6,
                                      matching: .images) {
@@ -121,21 +122,7 @@ struct ContentView: View {
                                 )
                                 .frame(width: 100, height: 100)
                         }
-                        .contentShape(Rectangle())  // Área de toque é o retângulo inteiro
-                        .zIndex(1)                  // Fica “acima” dos itens da lista
-                        // Força o PhotosPicker a lidar primeiro com o toque, sem propagar para a foto
-                        .gesture(
-                            ExclusiveGesture(
-                                TapGesture().onEnded {
-                                    // Em branco, pois o PhotosPicker em si já trata o tap
-                                },
-                                LongPressGesture(minimumDuration: 0.3).onEnded { _ in
-                                    // Em branco, para “consumir” o long press
-                                }
-                            )
-                        )
-                        
-                        
+
                         ForEach(photos.indices, id: \.self) { index in
                             PhotoGridItem(
                                 photo: photos[index],
@@ -148,23 +135,20 @@ struct ContentView: View {
                                     _ = withAnimation {
                                         selectedPhotoIndices.insert(index)
                                     }
-                                }
-                            )
-                            .simultaneousGesture(
-                                TapGesture()
-                                    .onEnded {
-                                        if selectedPhotoIndices.isEmpty {
-                                            onPhotoSelected(index)
-                                        } else {
-                                            withAnimation {
-                                                if selectedPhotoIndices.contains(index) {
-                                                    selectedPhotoIndices.remove(index)
-                                                } else {
-                                                    selectedPhotoIndices.insert(index)
-                                                }
+                                },
+                                onTap: {
+                                    if selectedPhotoIndices.isEmpty {
+                                        onPhotoSelected(index)
+                                    } else {
+                                        withAnimation {
+                                            if selectedPhotoIndices.contains(index) {
+                                                selectedPhotoIndices.remove(index)
+                                            } else {
+                                                selectedPhotoIndices.insert(index)
                                             }
                                         }
                                     }
+                                }
                             )
                         }
                     }
@@ -261,8 +245,9 @@ struct PhotoGridItem: View {
     let ns: Namespace.ID
     let isSelected: Bool
     var onLongPress: () -> Void
+    // Novo closure para tratar o toque simples
+    var onTap: () -> Void
 
-    // Use @State para controlar o estado da animação (scale)
     @State private var isPressed: Bool = false
 
     var body: some View {
@@ -272,25 +257,31 @@ struct PhotoGridItem: View {
                 .scaledToFill()
                 .frame(width: 100, height: 100)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
-                // Aplica o efeito de escala enquanto estiver pressionada
                 .scaleEffect(isPressed ? 0.95 : 1.0)
                 .animation(.easeInOut(duration: 0.2), value: isPressed)
                 .matchedTransitionSource(id: "photo_\(index)", in: ns)
 
-            // Indica seleção com uma borda
             RoundedRectangle(cornerRadius: 8)
                 .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 3)
                 .frame(width: 100, height: 100)
         }
-        // Utiliza o onLongPressGesture, que possui os parâmetros de duração e distância máxima.
-        // Se o usuário mover muito o dedo (para scrollar), a gesture é cancelada, permitindo o scroll.
-        .onLongPressGesture(minimumDuration: 0.2, maximumDistance: 10, pressing: { inProgress in
-            withAnimation(.easeInOut(duration: 0.2)) {
-                isPressed = inProgress
+        // Determina a área de toque completa, e unifica o onTap aqui
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onTap()
+        }
+        .onLongPressGesture(
+            minimumDuration: 0.2,
+            maximumDistance: 10,
+            pressing: { inProgress in
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isPressed = inProgress
+                }
+            },
+            perform: {
+                onLongPress()
             }
-        }, perform: {
-            onLongPress()
-        })
+        )
     }
 }
 
