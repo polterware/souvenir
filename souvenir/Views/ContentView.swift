@@ -15,12 +15,17 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                PhotosScrollView(photos: $photos,
-                                 selectedItems: $selectedItems,
-                                 ns: ns,
-                                 onPhotoSelected: { index in
-                                     navigateToPhotoEditor(photo: photos[index])
-                                 })
+                PhotosScrollView(
+                    photos: $photos,
+                    selectedItems: $selectedItems,
+                    ns: ns,
+                    onPhotoSelected: { index in
+                        navigateToPhotoEditor(photo: photos[index])
+                    },
+                    onPhotosChanged: {
+                        savePhotos()
+                    }
+                )
                 
                 CameraButtonView(ns: ns) {
                     showCamera = true
@@ -76,82 +81,110 @@ struct ContentView: View {
         @Binding var photos: [UIImage]
         @Binding var selectedItems: [PhotosPickerItem]
         @State private var selectedPhotoIndices: Set<Int> = []
+        @State private var showShareSheet: Bool = false
 
         var ns: Namespace.ID
-        // Add this line:
         var onPhotoSelected: (Int) -> Void
+        var onPhotosChanged: () -> Void
 
-        var body: some View {
-            VStack {
-                if photos.isEmpty {
-                    Text("No photos yet")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                        .padding()
-                } else {
-                    ScrollView {
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
-                            PhotosPicker(selection: $selectedItems,
-                                         maxSelectionCount: 5,
-                                         matching: .images) {
-                                RoundedRectangle(cornerRadius: 8)
-                                    .fill(Color(UIColor.systemGray5))
-                                    .aspectRatio(1, contentMode: .fit)
-                                    .overlay(
-                                        Image(systemName: "plus")
-                                            .foregroundColor(Color(UIColor.systemGray))
-                                            .font(.system(size: 30))
-                                    )
-                                    .frame(width: 100, height: 100)
-                            }
-
-                            ForEach(photos.indices, id: \.self) { index in
-                                PhotoGridItem(
-                                    photo: photos[index],
-                                    index: index,
-                                    ns: ns,
-                                    isSelected: selectedPhotoIndices.contains(index),
-                                    onLongPress: {
-                                        let generator = UIImpactFeedbackGenerator(style: .medium)
-                                        generator.impactOccurred()
-                                        _ = withAnimation {
-                                            selectedPhotoIndices.insert(index)
-                                        }
-                                    }
-                                )
-                                .simultaneousGesture(
-                                    TapGesture()
-                                        .onEnded {
-                                            if selectedPhotoIndices.isEmpty {
-                                                onPhotoSelected(index)
-                                            } else {
-                                                 withAnimation {
-                                                    if selectedPhotoIndices.contains(index) {
-                                                        selectedPhotoIndices.remove(index)
-                                                    } else {
-                                                        selectedPhotoIndices.insert(index)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                )
-                            }                        }
-                        .padding()
-                        .padding(.bottom, 120)
-                    }
-                }
+        // Propriedade computada para acessar as fotos selecionadas
+        var selectedPhotos: [UIImage] {
+            selectedPhotoIndices.compactMap { index in
+                if index < photos.count { return photos[index] }
+                else { return nil }
             }
         }
 
-        // Aqui, precisamos chamar a função de navegação que está no escopo de ContentView.
-        // Para isso, você pode mover `PhotosScrollView` para fora de ContentView e receber uma closure de navegação,
-        // ou definir a função `navigateToPhotoEditor` como estática, etc.
-        //
-        // Opção simples: deixar tudo dentro de ContentView (como no exemplo) e garantir que o compiler
-        // encontre `navigateToPhotoEditor` no mesmo escopo.
-        // Se houver problemas de visibilidade, mova essa função para dentro de PhotosScrollView,
-        // ou passe-a como parâmetro em uma closure, ex.:
-        // let onEditPhoto: (Int) -> Void
+        var body: some View {
+            VStack {
+                // Grid sempre exibida, com a célula do PhotosPicker (botão “+”) e as fotos existentes
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
+                        PhotosPicker(selection: $selectedItems,
+                                     maxSelectionCount: 5,
+                                     matching: .images) {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color(UIColor.systemGray5))
+                                .aspectRatio(1, contentMode: .fit)
+                                .overlay(
+                                    Image(systemName: "plus")
+                                        .foregroundColor(Color(UIColor.systemGray))
+                                        .font(.system(size: 30))
+                                )
+                                .frame(width: 100, height: 100)
+                        }
+
+                        ForEach(photos.indices, id: \.self) { index in
+                            PhotoGridItem(
+                                photo: photos[index],
+                                index: index,
+                                ns: ns,
+                                isSelected: selectedPhotoIndices.contains(index),
+                                onLongPress: {
+                                    let generator = UIImpactFeedbackGenerator(style: .medium)
+                                    generator.impactOccurred()
+                                    _ = withAnimation {
+                                        selectedPhotoIndices.insert(index)
+                                    }
+                                }
+                            )
+                            .simultaneousGesture(
+                                TapGesture()
+                                    .onEnded {
+                                        if selectedPhotoIndices.isEmpty {
+                                            onPhotoSelected(index)
+                                        } else {
+                                            withAnimation {
+                                                if selectedPhotoIndices.contains(index) {
+                                                    selectedPhotoIndices.remove(index)
+                                                } else {
+                                                    selectedPhotoIndices.insert(index)
+                                                }
+                                            }
+                                        }
+                                    }
+                            )
+                        }
+                    }
+                    .padding()
+                }
+                
+                // Botões de Share e Delete quando houver seleção
+                if !selectedPhotoIndices.isEmpty {
+                    HStack {
+                        Button(action: {
+                            showShareSheet = true
+                        }) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+                        Button(action: {
+                            for index in selectedPhotoIndices.sorted(by: >) {
+                                photos.remove(at: index)
+                            }
+                            selectedPhotoIndices.removeAll()
+                            onPhotosChanged() // Salva as alterações após deletar as fotos
+                        }) {
+                            Label("Delete", systemImage: "trash")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+                    }
+                    .padding()
+                }
+            }
+            // Folha de compartilhamento
+            .sheet(isPresented: $showShareSheet) {
+                ActivityView(activityItems: selectedPhotos)
+            }
+        }
     }
 
     // Botão que abre a Câmera
@@ -225,7 +258,7 @@ struct PhotoGridItem: View {
         }
         // Utiliza o onLongPressGesture, que possui os parâmetros de duração e distância máxima.
         // Se o usuário mover muito o dedo (para scrollar), a gesture é cancelada, permitindo o scroll.
-        .onLongPressGesture(minimumDuration: 0.5, maximumDistance: 10, pressing: { inProgress in
+        .onLongPressGesture(minimumDuration: 0.2, maximumDistance: 10, pressing: { inProgress in
             withAnimation(.easeInOut(duration: 0.2)) {
                 isPressed = inProgress
             }
@@ -235,6 +268,16 @@ struct PhotoGridItem: View {
     }
 }
 
+struct ActivityView: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    let applicationActivities: [UIActivity]? = nil
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: applicationActivities)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
 
 #Preview {
     ContentView()
