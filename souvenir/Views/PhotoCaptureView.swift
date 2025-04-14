@@ -7,91 +7,112 @@ struct PhotoCaptureView: View {
     @State private var isPhotoTaken: Bool = false
     @State private var isFlashOn: Bool = false
     @State private var isGridOn: Bool = false
+    @State private var zoomFactor: CGFloat = 1.0
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
-        ZStack {
-            CameraPreview(capturedImage: $capturedImage, isPhotoTaken: $isPhotoTaken, isFlashOn: $isFlashOn)
-                .frame(
-                    width: UIScreen.main.bounds.width,
-                    height: UIScreen.main.bounds.width * 16.0 / 9.0
-                )
-                .background(.red)
-                .cornerRadius(20)
-            
-            if isGridOn {
-                GeometryReader { geo in
-                    Path { path in
-                        let width = geo.size.width
-                        let height = geo.size.height
-                        let columnWidth = width / 3
-                        let rowHeight = height / 3
-                        path.move(to: CGPoint(x: columnWidth, y: 0))
-                        path.addLine(to: CGPoint(x: columnWidth, y: height))
-                        path.move(to: CGPoint(x: 2 * columnWidth, y: 0))
-                        path.addLine(to: CGPoint(x: 2 * columnWidth, y: height))
-                        path.move(to: CGPoint(x: 0, y: rowHeight))
-                        path.addLine(to: CGPoint(x: width, y: rowHeight))
-                        path.move(to: CGPoint(x: 0, y: 2 * rowHeight))
-                        path.addLine(to: CGPoint(x: width, y: 2 * rowHeight))
+        VStack {
+            ZStack {
+                CameraPreview(capturedImage: $capturedImage, isPhotoTaken: $isPhotoTaken, isFlashOn: $isFlashOn, zoomFactor: $zoomFactor)
+                    .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width * 16.0 / 9.0)
+                    .background(.red)
+                    .cornerRadius(20)
+                
+                if isGridOn {
+                    GeometryReader { geo in
+                        Path { path in
+                            let width = geo.size.width
+                            let height = geo.size.height
+                            let columnWidth = width / 3
+                            let rowHeight = height / 3
+                            path.move(to: CGPoint(x: columnWidth, y: 0))
+                            path.addLine(to: CGPoint(x: columnWidth, y: height))
+                            path.move(to: CGPoint(x: 2 * columnWidth, y: 0))
+                            path.addLine(to: CGPoint(x: 2 * columnWidth, y: height))
+                            path.move(to: CGPoint(x: 0, y: rowHeight))
+                            path.addLine(to: CGPoint(x: width, y: rowHeight))
+                            path.move(to: CGPoint(x: 0, y: 2 * rowHeight))
+                            path.addLine(to: CGPoint(x: width, y: 2 * rowHeight))
+                        }
+                        .stroke(Color.white.opacity(0.7), lineWidth: 1)
                     }
-                    .stroke(Color.white.opacity(0.7), lineWidth: 1)
                 }
+                
+                VStack {
+                    HStack {
+                        Button(action: {
+                            presentationMode.wrappedValue.dismiss()
+                        }) {
+                            HStack {
+                                Image(systemName: "xmark")
+                            }
+                            .modifier(BoxBlankStyle(cornerRadius: .infinity))
+                        }
+                        
+                        Spacer()
+                        
+                        Button(action: {
+                            isFlashOn.toggle()
+                        }) {
+                            HStack {
+                                Image(systemName: isFlashOn ? "bolt.fill" : "bolt")
+                            }
+                            .modifier(BoxBlankStyle(cornerRadius: .infinity))
+                        }
+                    }
+                    Spacer()
+                    HStack(alignment: .center) {
+                        Spacer()
+                        
+                        Button(action: {
+                            NotificationCenter.default.post(name: .capturePhoto, object: nil)
+                        }) {
+                            Circle()
+                                .fill(.ultraThinMaterial)
+                                .frame(width: 70, height: 70)
+                                .overlay(
+                                    Circle()
+                                        .stroke(.thinMaterial, lineWidth: 2)
+                                )
+                                .shadow(radius: 5)
+                        }
+                        .padding(20)
+                        
+                        Spacer()
+                        // Additional button or user-selected functionality can be placed here
+                    }
+                }
+                .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width * 16.0 / 9.0)
             }
             
-            VStack {
-                HStack {
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        HStack {
-                            Image(systemName: "xmark")
-                        }
+            HStack(alignment: .center) {
+                Button(action: {
+                    isGridOn.toggle()
+                }) {
+                    Image(systemName: isGridOn ? "square.grid.3x3.fill" : "square.grid.3x3")
                         .modifier(BoxBlankStyle(cornerRadius: .infinity))
-                    }
-                    
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        isFlashOn.toggle()
-                    }) {
-                        HStack {
-                            Image(systemName: isFlashOn ? "bolt.fill" : "bolt")
-                        }
-                        .modifier(BoxBlankStyle(cornerRadius: .infinity))
-                    }
-                
                 }
+                
                 Spacer()
-                HStack (alignment: .center){
-                    
+                
+                VStack {
                     Spacer()
-                    
-                    Button(action: {
-                        NotificationCenter.default.post(name: .capturePhoto, object: nil)
-                    }) {
-                        Circle()
-                            .fill(.ultraThinMaterial)
-                            .frame(width: 70, height: 70)
-                            .overlay(
-                                Circle()
-                                    .stroke(.thinMaterial, lineWidth: 2)
-                            )
-                            .shadow(radius: 5)
-                    }
-                    .padding(20)
-                    
-                    Spacer()
-                    
-                    
+                    Slider(value: $zoomFactor, in: 0.5...5.0, step: 0.1)
+                        .padding(.horizontal, 30)
+                    Spacer().frame(height: 20)
                 }
                 
+                Spacer()
+                
+                Button(action: {
+                    NotificationCenter.default.post(name: .switchCamera, object: nil)
+                }) {
+                    Image(systemName: "camera.rotate")
+                        .modifier(BoxBlankStyle(cornerRadius: .infinity))
+                }
             }
-            .frame(
-                width: UIScreen.main.bounds.width,
-                height: UIScreen.main.bounds.width * 16.0 / 9.0
-            )
+            
+            Spacer()
         }
         .navigationBarBackButtonHidden(true)
         .onChange(of: capturedImage) { _, newImage in
@@ -99,28 +120,7 @@ struct PhotoCaptureView: View {
                 onPhotoCaptured(image)
             }
         }
-        
-        
-        
-        HStack{
-            Button(action: {
-                isGridOn.toggle()
-            }) {
-                Image(systemName: isGridOn ? "square.grid.3x3.fill" : "square.grid.3x3")
-                    .modifier(BoxBlankStyle(cornerRadius: .infinity))
-            }
-            
-            Spacer()
-            Button(action: {
-                NotificationCenter.default.post(name: .switchCamera, object: nil)
-            }) {
-                Image(systemName: "camera.rotate")
-                    .modifier(BoxBlankStyle(cornerRadius: .infinity))
-            }
-            
-        }
-        
-        Spacer()
+        .padding(.top)
     }
 }
 
@@ -128,16 +128,20 @@ struct CameraPreview: UIViewControllerRepresentable {
     @Binding var capturedImage: UIImage?
     @Binding var isPhotoTaken: Bool
     @Binding var isFlashOn: Bool
+    @Binding var zoomFactor: CGFloat
 
     func makeUIViewController(context: Context) -> CameraViewController {
         let controller = CameraViewController()
         controller.capturedImage = $capturedImage
         controller.isPhotoTaken = $isPhotoTaken
         controller.isFlashOn = $isFlashOn
+        controller.zoomFactor = $zoomFactor
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: CameraViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: CameraViewController, context: Context) {
+        uiViewController.updateZoomFactor()
+    }
 }
 
 class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
@@ -147,6 +151,7 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     var capturedImage: Binding<UIImage?> = .constant(nil)
     var isPhotoTaken: Binding<Bool> = .constant(false)
     var isFlashOn: Binding<Bool> = .constant(false)
+    var zoomFactor: Binding<CGFloat> = .constant(1.0)
     var currentCameraPosition: AVCaptureDevice.Position = .back
     var flashOverlayView: UIView?
     
@@ -227,6 +232,20 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
             })
             self.capturedImage.wrappedValue = image
             self.isPhotoTaken.wrappedValue = true
+        }
+    }
+    
+    func updateZoomFactor() {
+        guard let currentInput = captureSession?.inputs.first as? AVCaptureDeviceInput else { return }
+        let device = currentInput.device
+        do {
+            try device.lockForConfiguration()
+            // Clamp the zoom factor between 0.5 and 5.0, but also respect the device's maximum zoom factor
+            let desiredZoom = min(max(zoomFactor.wrappedValue, 0.5), min(5.0, device.activeFormat.videoMaxZoomFactor))
+            device.videoZoomFactor = desiredZoom
+            device.unlockForConfiguration()
+        } catch {
+            print("Error setting zoom factor: \(error)")
         }
     }
     
