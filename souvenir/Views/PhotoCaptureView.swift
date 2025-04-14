@@ -11,6 +11,11 @@ struct PhotoCaptureView: View {
     var body: some View {
         ZStack {
             CameraPreview(capturedImage: $capturedImage, isPhotoTaken: $isPhotoTaken)
+                .frame(
+                    width: UIScreen.main.bounds.width,
+                    height: UIScreen.main.bounds.width * 16.0 / 9.0
+                )
+                .clipped()
                 .edgesIgnoringSafeArea(.all)
 
             VStack {
@@ -77,8 +82,8 @@ class CameraViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         super.viewDidLoad()
 
         captureSession = AVCaptureSession()
-        captureSession.sessionPreset = .photo
-
+        captureSession.sessionPreset = .hd1920x1080
+        
         guard let videoCaptureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else { return }
         guard let videoInput = try? AVCaptureDeviceInput(device: videoCaptureDevice) else { return }
 
