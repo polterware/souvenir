@@ -9,10 +9,15 @@ struct PhotoEditorView: View {
     @State private var filteredImage: UIImage?
     @State private var zoomScale: CGFloat = 1.0
     @State private var lastZoomScale: CGFloat = 1.0
+    @State private var bottomSize: CGFloat = 0.25
     @State private var previewCache: [String: UIImage] = [:]
     private static let sharedCIContext = CIContext()
     @State private var selectedCategory: String = "filters"
     
+
+    // Novas propriedades de estado para os ajustes de edição
+    @State private var selectedEditOption: String? = nil
+    @State private var sliderValue: Double = 0.0
     
     init(photo: UIImage, namespace: Namespace.ID, matchedID: String) {
         _image = State(initialValue: photo)
@@ -59,7 +64,6 @@ struct PhotoEditorView: View {
                                         }
                                 )
                                 .cornerRadius(20)
-                            
                         } else {
                             Text("Carregue ou selecione uma imagem para editar")
                                 .font(.headline)
@@ -67,132 +71,265 @@ struct PhotoEditorView: View {
                         }
                     }
                     .padding(.horizontal)
-                    .frame(height: geometry.size.height * 0.75)
+                    .frame(maxHeight: .infinity)
                     
-                    ScrollView(.horizontal, showsIndicators: false) {
+                    
+                    
+                    VStack{
                         HStack {
                             if selectedCategory == "filters" {
-                                ForEach(["sepia", "noir", "invert"], id: \.self) { filter in
-                                    Button(action: {
-                                        applyFilter(filterName: filter)
-                                    }) {
-                                        if let preview = createFilteredImage(filterName: filter) {
-                                            Image(uiImage: preview)
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: 70, height: 70)
-                                                .clipped()
-                                                .cornerRadius(10)
-                                        } else {
-                                            Rectangle()
-                                                .fill(Color.secondary)
-                                                .frame(width: 70, height: 70)
+                                ScrollView(.horizontal) {
+                                    HStack {
+                                        ForEach(["sepia", "noir", "invert"], id: \.self) { filter in
+                                            Button(action: {
+                                                applyFilter(filterName: filter)
+                                            }) {
+                                                if let preview = createFilteredImage(filterName: filter) {
+                                                    Image(uiImage: preview)
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: 70, height: 70)
+                                                        .clipped()
+                                                        .cornerRadius(10)
+                                                } else {
+                                                    Rectangle()
+                                                        .fill(Color.secondary)
+                                                        .frame(width: 70, height: 70)
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             } else if selectedCategory == "edit" {
-                                ForEach(["crop", "brightness", "contrast"], id: \.self) { option in
-
-                                    Button(action: {
-                                        // Adicione aqui a ação específica para a opção de edição, se necessário
-                                    }) {
-                                        Image(systemName: editOptionIcon(for: option))
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 20, height: 20)
-                                            .padding()
+                                VStack(spacing: 0) {
+                                    // Scroll horizontal para os botões de opções de edição
+                                    ScrollView(.horizontal) {
+                                        HStack {
+                                            ForEach(["brightness", "contrast"], id: \.self) { option in
+                                                Button(action: {
+                                                    selectedEditOption = option
+                                                    sliderValue = defaultSliderValue(for: option)
+                                                }) {
+                                                    Image(systemName: editOptionIcon(for: option))
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: 20, height: 20)
+                                                        .padding()
+                                                }
+                                                .modifier(BoxBlankStyle(cornerRadius: .infinity, padding: 0))
+                                                .padding(.bottom, 8)
+                                                
+                                            }
+                                        }
+                                        .padding(.horizontal)
                                     }
-                                    .modifier(
-                                        BoxBlankStyle(
-                                            cornerRadius: 10, size: 70
-                                        )
-                                    )
-                                    .frame(width: 70, height: 70)
-                                    
+                                    .onAppear {
+                                        if selectedEditOption == nil {
+                                            selectedEditOption = "brightness"
+                                            sliderValue = defaultSliderValue(for: "brightness")
+                                        }
+                                    }
+                                    // Define a opção atual (caso nenhuma esteja definida, usa "brightness")
+                                    let currentOption = selectedEditOption ?? "brightness"
+                                    // Área do slider sempre visível e em full width
+                                    VStack(spacing: 8) {
+                                        Slider(value: $sliderValue, in: sliderRange(for: currentOption), step: 0.01)
+                                            .onChange(of: sliderValue) {_, newValue in
+                                                applyEditOptionAdjustment(option: currentOption, value: newValue, useThumbnail: true)
+                                            }
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.horizontal)
+                                        Text(String(format: "%.2f", sliderValue))
+                                            .font(.caption)
+                                    }
+                                    .animation(.easeInOut, value: sliderValue)
                                 }
+                                .frame(maxWidth: .infinity, alignment: .top)
+                                .animation(.easeInOut, value: selectedEditOption)
+                                
                             } else if selectedCategory == "presets" {
-                                ForEach(["vintage", "vibrant", "minimal"], id: \.self) { preset in
-                                    Button(action: {
-                                        applyPreset(presetName: preset)
-                                    }) {
-                                        if let presetPreview = createPresetImage(presetName: preset) {
-                                            Image(uiImage: presetPreview)
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: 70, height: 70)
-                                                .clipped()
-                                                .cornerRadius(10)
-                                        } else {
-                                            Rectangle()
-                                                .fill(Color.secondary)
-                                                .frame(width: 70, height: 70)
+                                ScrollView(.horizontal) {
+                                    HStack {
+                                        ForEach(["vintage", "vibrant", "minimal"], id: \.self) { preset in
+                                            Button(action: {
+                                                applyPreset(presetName: preset)
+                                            }) {
+                                                if let presetPreview = createPresetImage(presetName: preset) {
+                                                    Image(uiImage: presetPreview)
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: 70, height: 70)
+                                                        .clipped()
+                                                        .cornerRadius(10)
+                                                } else {
+                                                    Rectangle()
+                                                        .fill(Color.secondary)
+                                                        .frame(width: 70, height: 70)
+                                                }
+                                            }
                                         }
                                     }
                                 }
+                            } else if selectedCategory == "crop" {
+                                // Exibe uma placeholder para a UI de crop
+                                Text("Crop UI placeholder")
+                                    .padding()
                             }
+                            else if selectedCategory == "sticker" {
+                                // Exibe uma placeholder para a UI de crop
+                                Text("Sticker UI placeholder")
+                                    .padding()
+                            }
+                            
                         }
-                    }
-                    .frame(alignment: .top)
-                    .padding()
-                
-                    // 3. Abaixo dessa scroll view, adicione a scroll view de seleção de categorias:
-                    
+                        .frame(maxWidth: .infinity, alignment: .top)
+                        .padding()
+                        
+                        // Scroll view de seleção de categorias (barra inferior)
                         HStack {
                             Spacer()
                             Button(action: {
                                 selectedCategory = "filters"
+                                
+                                bottomSize = 0.25
+                                
                             }) {
                                 VStack {
                                     Image(systemName: "wand.and.stars")
                                         .resizable()
                                         .scaledToFit()
-                                        .frame(width: 30, height: 30)
-                                        .foregroundColor(selectedCategory == "filters" ? .blue : .gray)
-                                   
+                                        .frame(width: 20, height: 20)
+                                        .foregroundColor(selectedCategory == "filters" ? .purple : .gray)
                                 }
                             }
                             Spacer()
                             Button(action: {
                                 selectedCategory = "edit"
+                                
+                                bottomSize = 0.30
+                                
                             }) {
                                 VStack {
                                     Image(systemName: "slider.horizontal.3")
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 20, height: 20)
-                                        .foregroundColor(selectedCategory == "edit" ? .blue : .gray)
-                                    
+                                        .foregroundColor(selectedCategory == "edit" ? .purple : .gray)
                                 }
                             }
                             Spacer()
                             Button(action: {
                                 selectedCategory = "presets"
+                                
+                                bottomSize = 0.25
+                                
                             }) {
                                 VStack {
                                     Image(systemName: "paintpalette")
                                         .resizable()
                                         .scaledToFit()
                                         .frame(width: 20, height: 20)
-                                        .foregroundColor(selectedCategory == "presets" ? .blue : .gray)
+                                        .foregroundColor(selectedCategory == "presets" ? .purple : .gray)
                                 }
                             }
                             Spacer()
-                           
+                            Button(action: {
+                                selectedCategory = "sticker"
+                                
+                                bottomSize = 0.25
+                                
+                            }) {
+                                VStack {
+                                    Image(systemName: "seal")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 20, height: 20)
+                                        .foregroundColor(selectedCategory == "sticker" ? .purple : .gray)
+                                }
+                            }
+                            Spacer()
+                            Button(action: {
+                                selectedCategory = "crop"
+                                
+                                bottomSize = 0.25
+                                
+                            }) {
+                                VStack {
+                                    Image(systemName: "crop")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 20, height: 20)
+                                        .foregroundColor(selectedCategory == "crop" ? .purple : .gray)
+                                }
+                            }
+                            Spacer()
                         }
                         .padding(.horizontal)
-                    
-             
-                
-                    Spacer()
+                        Spacer()
                         
+                    }
+                    .frame(height: geometry.size.height * bottomSize, alignment: .top)
+                    .animation(.spring, value: bottomSize)
+                    
                 }
-                
             }
         }
         .ignoresSafeArea(edges: .bottom)
     }
     
-    // New applyFilter method that applies different effects based on the filterName
+    // Funções auxiliares para os ajustes de edição com slider
+    func sliderRange(for option: String) -> ClosedRange<Double> {
+        switch option {
+        case "brightness":
+            return -1.0...1.0
+        case "contrast":
+            return 0.5...1.5
+        default:
+            return 0...1
+        }
+    }
+    
+    func defaultSliderValue(for option: String) -> Double {
+        switch option {
+        case "brightness":
+            return 0.0
+        case "contrast":
+            return 1.0
+        default:
+            return 0.0
+        }
+    }
+    
+    func applyEditOptionAdjustment(option: String, value: Double, useThumbnail: Bool) {
+        guard let inputImage = image else { return }
+        let context = PhotoEditorView.sharedCIContext
+        
+        let source = useThumbnail ? thumbnail(for: inputImage, maxDimension: 300) : inputImage
+        guard let ciInput = CIImage(image: source?.fixOrientation() ?? inputImage) else { return }
+        
+        let filter = CIFilter.colorControls()
+        filter.inputImage = ciInput
+        
+        switch option {
+        case "brightness":
+            filter.brightness = Float(value)
+            filter.contrast = 1.0
+            filter.saturation = 1.0
+        case "contrast":
+            filter.contrast = Float(value)
+            filter.brightness = 0.0
+            filter.saturation = 1.0
+        default:
+            break
+        }
+        
+        if let outputImage = filter.outputImage,
+           let cgImage = context.createCGImage(outputImage, from: outputImage.extent) {
+            filteredImage = UIImage(cgImage: cgImage)
+        }
+    }
+    
+    // Métodos de filtros e presets já existentes
     func applyFilter(filterName: String) {
         guard let inputImage = image else { return }
         let context = PhotoEditorView.sharedCIContext
@@ -298,7 +435,7 @@ struct PhotoEditorView: View {
             filteredImage = UIImage(cgImage: cgImage)
         }
     }
-
+    
     func createPresetImage(presetName: String) -> UIImage? {
         guard let inputImage = image else { return nil }
         let context = PhotoEditorView.sharedCIContext
@@ -344,12 +481,9 @@ struct PhotoEditorView: View {
         return thumb
     }
     
-    
-    // 4. Adicione a função auxiliar editOptionIcon(for:) dentro do struct PhotoEditorView, por exemplo, logo após a função thumbnail(for:):
+    // Função auxiliar para obter o ícone do ajuste de edição
     func editOptionIcon(for option: String) -> String {
         switch option {
-        case "crop":
-            return "crop"
         case "brightness":
             return "sun.max"
         case "contrast":
@@ -374,6 +508,6 @@ extension UIImage {
     }
 }
 
-#Preview{
+#Preview {
     ContentView()
 }
