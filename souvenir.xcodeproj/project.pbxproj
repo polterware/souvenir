@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2CA967D42DAB8DAE002C6D35 /* FluidGradient in Frameworks */ = {isa = PBXBuildFile; productRef = 2CA967D32DAB8DAE002C6D35 /* FluidGradient */; };
+		2CA967F52DAEDD35002C6D35 /* MetalPetal in Frameworks */ = {isa = PBXBuildFile; productRef = 2CA967F42DAEDD35002C6D35 /* MetalPetal */; };
 		2CB568AA2C7CB9B50027924C /* souvenirApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB568A92C7CB9B50027924C /* souvenirApp.swift */; };
 		2CB568AE2C7CB9B70027924C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CB568AD2C7CB9B70027924C /* Assets.xcassets */; };
 		2CB568B12C7CB9B70027924C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2CB568B02C7CB9B70027924C /* Preview Assets.xcassets */; };
@@ -72,6 +73,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				77334B806A41780F0F4E981A /* Pods_souvenir.framework in Frameworks */,
+				2CA967F52DAEDD35002C6D35 /* MetalPetal in Frameworks */,
 				2CA967D42DAB8DAE002C6D35 /* FluidGradient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -275,6 +277,7 @@
 			mainGroup = 2CB5689D2C7CB9B50027924C;
 			packageReferences = (
 				2C5C54A42DAB8C3E003F5A61 /* XCRemoteSwiftPackageReference "FluidGradient" */,
+				2CA967F32DAEDD35002C6D35 /* XCRemoteSwiftPackageReference "MetalPetal" */,
 			);
 			productRefGroup = 2CB568A72C7CB9B50027924C /* Products */;
 			projectDirPath = "";
@@ -747,6 +750,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		2CA967F32DAEDD35002C6D35 /* XCRemoteSwiftPackageReference "MetalPetal" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MetalPetal/MetalPetal.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.25.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -754,6 +765,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2C5C54A42DAB8C3E003F5A61 /* XCRemoteSwiftPackageReference "FluidGradient" */;
 			productName = FluidGradient;
+		};
+		2CA967F42DAEDD35002C6D35 /* MetalPetal */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2CA967F32DAEDD35002C6D35 /* XCRemoteSwiftPackageReference "MetalPetal" */;
+			productName = MetalPetal;
 		};
 /* End XCSwiftPackageProductDependency section */
 
