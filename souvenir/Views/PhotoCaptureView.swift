@@ -15,7 +15,6 @@ struct PhotoCaptureView: View {
             ZStack {
                 CameraPreview(capturedImage: $capturedImage, isPhotoTaken: $isPhotoTaken, isFlashOn: $isFlashOn, zoomFactor: $zoomFactor)
                     .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width * 16.0 / 9.0)
-                    .background(.red)
                     .cornerRadius(20)
                 
                 if isGridOn {
@@ -51,14 +50,7 @@ struct PhotoCaptureView: View {
                         
                         Spacer()
                         
-                        Button(action: {
-                            isFlashOn.toggle()
-                        }) {
-                            HStack {
-                                Image(systemName: isFlashOn ? "bolt.fill" : "bolt")
-                            }
-                            .modifier(BoxBlankStyle(cornerRadius: .infinity))
-                        }
+                       
                     }
                     Spacer()
                     HStack(alignment: .center) {
@@ -95,11 +87,13 @@ struct PhotoCaptureView: View {
                 
                 Spacer()
                 
-                VStack {
-                    Spacer()
-                    Slider(value: $zoomFactor, in: 0.5...5.0, step: 0.1)
-                        .padding(.horizontal, 30)
-                    Spacer().frame(height: 20)
+                Button(action: {
+                    isFlashOn.toggle()
+                }) {
+                    HStack {
+                        Image(systemName: isFlashOn ? "bolt.fill" : "bolt")
+                    }
+                    .modifier(BoxBlankStyle(cornerRadius: .infinity))
                 }
                 
                 Spacer()
