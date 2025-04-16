@@ -278,6 +278,7 @@
 			packageReferences = (
 				2C5C54A42DAB8C3E003F5A61 /* XCRemoteSwiftPackageReference "FluidGradient" */,
 				2CA967F32DAEDD35002C6D35 /* XCRemoteSwiftPackageReference "MetalPetal" */,
+				2CA968002DAFF42E002C6D35 /* XCRemoteSwiftPackageReference "Brightroom" */,
 			);
 			productRefGroup = 2CB568A72C7CB9B50027924C /* Products */;
 			projectDirPath = "";
@@ -756,6 +757,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.25.2;
+			};
+		};
+		2CA968002DAFF42E002C6D35 /* XCRemoteSwiftPackageReference "Brightroom" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/FluidGroup/Brightroom.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
