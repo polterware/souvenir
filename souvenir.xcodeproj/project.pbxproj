@@ -17,6 +17,7 @@
 		2CB568C02C7CB9B70027924C /* souvenirTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB568BF2C7CB9B70027924C /* souvenirTests.swift */; };
 		2CB568CA2C7CB9B70027924C /* souvenirUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB568C92C7CB9B70027924C /* souvenirUITests.swift */; };
 		2CB568CC2C7CB9B70027924C /* souvenirUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB568CB2C7CB9B70027924C /* souvenirUITestsLaunchTests.swift */; };
+		2CD17E312DEA0B4D00D398A2 /* souvenir.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 2CD17E272DEA0B4D00D398A2 /* souvenir.xcdatamodeld */; };
 		328FBDFB8F4364EF1A687229 /* Pods_souvenirTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A91A709063430D6E03207B1D /* Pods_souvenirTests.framework */; };
 		6CF2154A2E8538724F1F80CC /* Pods_souvenir_souvenirUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39577DCE7F28138483665ADE /* Pods_souvenir_souvenirUITests.framework */; };
 		77334B806A41780F0F4E981A /* Pods_souvenir.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A68CB3F3D8575CF4632EFD9 /* Pods_souvenir.framework */; };
@@ -53,6 +54,7 @@
 		2CB568C52C7CB9B70027924C /* souvenirUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = souvenirUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CB568C92C7CB9B70027924C /* souvenirUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = souvenirUITests.swift; sourceTree = "<group>"; };
 		2CB568CB2C7CB9B70027924C /* souvenirUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = souvenirUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		2CD17E2F2DEA0B4D00D398A2 /* souvenir.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = souvenir.xcdatamodel; sourceTree = "<group>"; };
 		39577DCE7F28138483665ADE /* Pods_souvenir_souvenirUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_souvenir_souvenirUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		47378FE20A4C1A6015752265 /* Pods-souvenir-souvenirUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-souvenir-souvenirUITests.debug.xcconfig"; path = "Target Support Files/Pods-souvenir-souvenirUITests/Pods-souvenir-souvenirUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		4A68CB3F3D8575CF4632EFD9 /* Pods_souvenir.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_souvenir.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,7 +66,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		2C5C549D2DAAC16C003F5A61 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
+		2CD17E1F2DEA0B4D00D398A2 /* Controllers */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Controllers; sourceTree = "<group>"; };
+		2CD17E222DEA0B4D00D398A2 /* Extensions */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Extensions; sourceTree = "<group>"; };
+		2CD17E242DEA0B4D00D398A2 /* Helpers */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Helpers; sourceTree = "<group>"; };
+		2CD17E262DEA0B4D00D398A2 /* Preview Content */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Preview Content"; sourceTree = "<group>"; };
+		2CD17E4E2DEA0C3E00D398A2 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,7 +141,12 @@
 		2CB568A82C7CB9B50027924C /* souvenir */ = {
 			isa = PBXGroup;
 			children = (
-				2C5C549D2DAAC16C003F5A61 /* Views */,
+				2CD17E1F2DEA0B4D00D398A2 /* Controllers */,
+				2CD17E222DEA0B4D00D398A2 /* Extensions */,
+				2CD17E242DEA0B4D00D398A2 /* Helpers */,
+				2CD17E262DEA0B4D00D398A2 /* Preview Content */,
+				2CD17E272DEA0B4D00D398A2 /* souvenir.xcdatamodeld */,
+				2CD17E4E2DEA0C3E00D398A2 /* Views */,
 				2C943CA52DA99B870085FA15 /* Info.plist */,
 				2CB568A92C7CB9B50027924C /* souvenirApp.swift */,
 				2CB568AD2C7CB9B70027924C /* Assets.xcassets */,
@@ -198,7 +209,11 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				2C5C549D2DAAC16C003F5A61 /* Views */,
+				2CD17E1F2DEA0B4D00D398A2 /* Controllers */,
+				2CD17E222DEA0B4D00D398A2 /* Extensions */,
+				2CD17E242DEA0B4D00D398A2 /* Helpers */,
+				2CD17E262DEA0B4D00D398A2 /* Preview Content */,
+				2CD17E4E2DEA0C3E00D398A2 /* Views */,
 			);
 			name = souvenir;
 			productName = souvenir;
@@ -393,6 +408,7 @@
 			files = (
 				2CB568B62C7CB9B70027924C /* souvenir.xcdatamodeld in Sources */,
 				2CB568B32C7CB9B70027924C /* Persistence.swift in Sources */,
+				2CD17E312DEA0B4D00D398A2 /* souvenir.xcdatamodeld in Sources */,
 				2CB568AA2C7CB9B50027924C /* souvenirApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -789,6 +805,16 @@
 				2CB568B52C7CB9B70027924C /* souvenir.xcdatamodel */,
 			);
 			currentVersion = 2CB568B52C7CB9B70027924C /* souvenir.xcdatamodel */;
+			path = souvenir.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+		2CD17E272DEA0B4D00D398A2 /* souvenir.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				2CD17E2F2DEA0B4D00D398A2 /* souvenir.xcdatamodel */,
+			);
+			currentVersion = 2CD17E2F2DEA0B4D00D398A2 /* souvenir.xcdatamodel */;
 			path = souvenir.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
