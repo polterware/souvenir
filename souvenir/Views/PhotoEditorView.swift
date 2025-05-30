@@ -1,8 +1,8 @@
 import SwiftUI
 import CoreImage
 import CoreImage.CIFilterBuiltins
-// Importar os helpers e extensão modularizados
-import PhotoEditorHelper
+
+
 
 struct PhotoEditorView: View {
     let namespace: Namespace.ID

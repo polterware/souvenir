@@ -1,10 +1,6 @@
 import SwiftUI
 import AVFoundation
 import Foundation
-// Importar os módulos recém-criados
-import CameraPreview
-import CameraViewController
-import Notification_Camera
 
 struct PhotoCaptureView: View {
     var onPhotoCaptured: (UIImage) -> Void
