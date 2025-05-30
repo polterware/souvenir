@@ -71,6 +71,7 @@
 		2CD17E242DEA0B4D00D398A2 /* Helpers */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Helpers; sourceTree = "<group>"; };
 		2CD17E262DEA0B4D00D398A2 /* Preview Content */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Preview Content"; sourceTree = "<group>"; };
 		2CD17E4E2DEA0C3E00D398A2 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
+		2CD17E6C2DEA49F500D398A2 /* ViewModels */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ViewModels; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +142,7 @@
 		2CB568A82C7CB9B50027924C /* souvenir */ = {
 			isa = PBXGroup;
 			children = (
+				2CD17E6C2DEA49F500D398A2 /* ViewModels */,
 				2CD17E1F2DEA0B4D00D398A2 /* Controllers */,
 				2CD17E222DEA0B4D00D398A2 /* Extensions */,
 				2CD17E242DEA0B4D00D398A2 /* Helpers */,
@@ -214,6 +216,7 @@
 				2CD17E242DEA0B4D00D398A2 /* Helpers */,
 				2CD17E262DEA0B4D00D398A2 /* Preview Content */,
 				2CD17E4E2DEA0C3E00D398A2 /* Views */,
+				2CD17E6C2DEA49F500D398A2 /* ViewModels */,
 			);
 			name = souvenir;
 			productName = souvenir;
