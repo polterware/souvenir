@@ -1,6 +1,8 @@
 import SwiftUI
 import CoreImage
 import CoreImage.CIFilterBuiltins
+// Importar os helpers e extensão modularizados
+import PhotoEditorHelper
 
 struct PhotoEditorView: View {
     let namespace: Namespace.ID
@@ -185,7 +187,7 @@ struct PhotoEditorView: View {
                                         
                                         Slider(
                                             value: $sliderValue,
-                                            in: sliderRange(for: currentOption),
+                                            in: PhotoEditorHelper.sliderRange(for: currentOption),
                                             step: 0.01,
                                             onEditingChanged: { editing in
                                                 if !editing {  // Quando o usuário termina de arrastar
@@ -390,7 +392,7 @@ struct PhotoEditorView: View {
     func applyAllEditAdjustments(useThumbnail: Bool = false) {
         guard let inputImage = image else { return }
         let context = PhotoEditorView.sharedCIContext
-        let baseImage = useThumbnail ? thumbnail(for: inputImage, maxDimension: 300) ?? inputImage : inputImage
+        let baseImage = useThumbnail ? PhotoEditorHelper.thumbnail(for: inputImage, maxDimension: 300) ?? inputImage : inputImage
         guard var ciImage = CIImage(image: baseImage.fixOrientation()) else { return }
         
         // Aplica ajustes de cor (brilho, contraste, saturação) apenas se os valores forem diferentes dos padrões
@@ -518,7 +520,7 @@ struct PhotoEditorView: View {
         let context = PhotoEditorView.sharedCIContext
         var outputImage: CIImage?
         
-        guard let thumbImage = thumbnail(for: inputImage, maxDimension: 60) else { return nil }
+        guard let thumbImage = PhotoEditorHelper.thumbnail(for: inputImage, maxDimension: 60) else { return nil }
         
         switch filterName {
         case "sepia":
@@ -588,7 +590,7 @@ struct PhotoEditorView: View {
         guard let inputImage = image else { return nil }
         let context = PhotoEditorView.sharedCIContext
         var outputImage: CIImage?
-        guard let thumbImage = thumbnail(for: inputImage, maxDimension: 60) else { return nil }
+        guard let thumbImage = PhotoEditorHelper.thumbnail(for: inputImage, maxDimension: 60) else { return nil }
         
         switch presetName {
         case "vintage":
@@ -618,17 +620,6 @@ struct PhotoEditorView: View {
         return nil
     }
     
-    func thumbnail(for image: UIImage, maxDimension: CGFloat = 60) -> UIImage? {
-        let size = image.size
-        let ratio = min(maxDimension / size.width, maxDimension / size.height)
-        let newSize = CGSize(width: size.width * ratio, height: size.height * ratio)
-        UIGraphicsBeginImageContextWithOptions(newSize, false, 0)
-        image.draw(in: CGRect(origin: .zero, size: newSize))
-        let thumb = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return thumb
-    }
-    
     // Função auxiliar para obter o ícone do ajuste de edição
     func editOptionIcon(for option: String) -> String {
         switch option {
@@ -649,20 +640,6 @@ struct PhotoEditorView: View {
         default:
             return "slider.horizontal.3"
         }
-    }
-}
-
-extension UIImage {
-    func fixOrientation() -> UIImage {
-        if imageOrientation == .up {
-            return self
-        }
-        
-        UIGraphicsBeginImageContextWithOptions(size, false, scale)
-        draw(in: CGRect(origin: .zero, size: size))
-        let normalizedImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return normalizedImage ?? self
     }
 }
 
