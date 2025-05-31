@@ -7,6 +7,8 @@
 
 import SwiftUI
 import Combine
+import UIKit
+import CoreImage
 
 class PhotoEditorViewModel: ObservableObject {
     @Published var image: UIImage?
@@ -21,11 +23,82 @@ class PhotoEditorViewModel: ObservableObject {
     @Published var sharpnessValue: Double = 0.0
     @Published var grainValue: Double = 0.02
     @Published var whitePointValue: Double = 1.0
+    @Published var isEditing: Bool = false
 
     static let sharedCIContext = CIContext()
+    private var cancellables = Set<AnyCancellable>()
+    private var thumbnail: UIImage? = nil
 
     init(image: UIImage?) {
         self.image = image
+        self.thumbnail = image?.resizeToFit(maxSize: 400)
+        // Debounce para sliderValue
+        $sliderValue
+            .removeDuplicates()
+            .debounce(for: .milliseconds(120), scheduler: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                if self.isEditing {
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        let preview = self.processAdjustments(useThumbnail: true)
+                        DispatchQueue.main.async {
+                            self.filteredImage = preview
+                        }
+                    }
+                } else {
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        let full = self.processAdjustments(useThumbnail: false)
+                        DispatchQueue.main.async {
+                            self.filteredImage = full
+                        }
+                    }
+                }
+            }
+            .store(in: &cancellables)
+    }
+
+    // Novo método para processar ajustes
+    private func processAdjustments(useThumbnail: Bool) -> UIImage? {
+        let baseImage = useThumbnail ? (thumbnail ?? image) : image
+        guard let original = baseImage else { return nil }
+        var ciImage = CIImage(image: original)
+        let colorControls = CIFilter(name: "CIColorControls")!
+        colorControls.setValue(ciImage, forKey: kCIInputImageKey)
+        colorControls.setValue(brightnessValue, forKey: kCIInputBrightnessKey)
+        colorControls.setValue(contrastValue, forKey: kCIInputContrastKey)
+        colorControls.setValue(saturationValue, forKey: kCIInputSaturationKey)
+        ciImage = colorControls.outputImage
+        if let exposure = CIFilter(name: "CIExposureAdjust") {
+            exposure.setValue(ciImage, forKey: kCIInputImageKey)
+            exposure.setValue(exposureValue, forKey: kCIInputEVKey)
+            ciImage = exposure.outputImage
+        }
+        if let sharpness = CIFilter(name: "CISharpenLuminance") {
+            sharpness.setValue(ciImage, forKey: kCIInputImageKey)
+            sharpness.setValue(sharpnessValue, forKey: kCIInputSharpnessKey)
+            ciImage = sharpness.outputImage
+        }
+        if grainValue > 0.0, let grain = CIFilter(name: "CINoiseReduction") {
+            grain.setValue(ciImage, forKey: kCIInputImageKey)
+            grain.setValue(grainValue, forKey: "inputNoiseLevel")
+            ciImage = grain.outputImage
+        }
+        if let white = CIFilter(name: "CIGammaAdjust") {
+            white.setValue(ciImage, forKey: kCIInputImageKey)
+            white.setValue(whitePointValue, forKey: "inputPower")
+            ciImage = white.outputImage
+        }
+        if let finalCIImage = ciImage,
+           let cgimg = PhotoEditorViewModel.sharedCIContext.createCGImage(finalCIImage, from: finalCIImage.extent) {
+            return UIImage(cgImage: cgimg)
+        }
+        return nil
+    }
+
+    // Chama applyAllEditAdjustments na main thread após processamento
+    private func applyAllEditAdjustmentsOnMainThread() {
+        // O processamento é feito em background, mas a atualização da UI deve ser na main thread
+        self.applyAllEditAdjustments()
     }
 
     func applyFilter(_ filterName: String) {
@@ -134,34 +207,4 @@ class PhotoEditorViewModel: ObservableObject {
         return nil
     }
 
-    func applyPreset(_ presetName: String) {
-        guard let img = image else { return }
-        let ciImage = CIImage(image: img)
-        var output: CIImage?
-
-        switch presetName {
-        case "Preset1":
-            if let filter = CIFilter(name: "CIPhotoEffectTransfer") {
-                filter.setValue(ciImage, forKey: kCIInputImageKey)
-                output = filter.outputImage
-            }
-        case "Preset2":
-            if let filter = CIFilter(name: "CIPhotoEffectChrome") {
-                filter.setValue(ciImage, forKey: kCIInputImageKey)
-                output = filter.outputImage
-            }
-        case "Preset3":
-            if let filter = CIFilter(name: "CIPhotoEffectProcess") {
-                filter.setValue(ciImage, forKey: kCIInputImageKey)
-                output = filter.outputImage
-            }
-        default:
-            output = ciImage
-        }
-
-        if let result = output,
-           let cgimg = PhotoEditorViewModel.sharedCIContext.createCGImage(result, from: result.extent) {
-            filteredImage = UIImage(cgImage: cgimg)
-        }
-    }
 }

@@ -17,6 +17,7 @@ struct PhotoEditorAdjustments: View {
     @Binding var sharpnessValue: Double
     @Binding var grainValue: Double
     @Binding var whitePointValue: Double
+    @Binding var isEditing: Bool
     var applyAllEditAdjustments: () -> Void
     var updateOptionValue: (String, Double) -> Void
 
@@ -60,11 +61,16 @@ struct PhotoEditorAdjustments: View {
                             set: { newValue in
                                 sliderValue = newValue
                                 updateOptionValue(selected, newValue)
-                                applyAllEditAdjustments()
                             }
                         ),
                         in: config.range,
-                        step: config.step
+                        step: config.step,
+                        onEditingChanged: { editing in
+                            isEditing = editing
+                            if !editing {
+                                applyAllEditAdjustments()
+                            }
+                        }
                     )
                     .accentColor(.purple)
                     .padding(.horizontal)

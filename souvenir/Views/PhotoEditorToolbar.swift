@@ -14,15 +14,11 @@ struct PhotoEditorToolbar: View {
     var body: some View {
         HStack {
             Spacer()
-            CategoryButton(category: "filters", icon: "wand.and.stars", selectedCategory: $selectedCategory, bottomSize: $bottomSize, targetSize: 0.25)
+            CategoryButton(category: "filters", icon: "paintpalette", selectedCategory: $selectedCategory, bottomSize: $bottomSize, targetSize: 0.25)
             Spacer()
             CategoryButton(category: "edit", icon: "slider.horizontal.3", selectedCategory: $selectedCategory, bottomSize: $bottomSize, targetSize: 0.30)
             Spacer()
-            CategoryButton(category: "presets", icon: "paintpalette", selectedCategory: $selectedCategory, bottomSize: $bottomSize, targetSize: 0.25)
-            Spacer()
             CategoryButton(category: "sticker", icon: "seal", selectedCategory: $selectedCategory, bottomSize: $bottomSize, targetSize: 0.25)
-            Spacer()
-            CategoryButton(category: "crop", icon: "crop", selectedCategory: $selectedCategory, bottomSize: $bottomSize, targetSize: 0.25)
             Spacer()
         }
         .padding(.horizontal)
