@@ -39,7 +39,7 @@ struct ContentView: View {
                 Task {
                     for item in newItems {
                         if let data = try? await item.loadTransferable(type: Data.self),
-                           let uiImage = UIImage(data: data)?.withAlpha() {
+                           let uiImage = UIImage(data: data)?.fixOrientation().withAlpha() {
                             photos.append(uiImage)
                         }
                     }
@@ -82,8 +82,12 @@ struct ContentView: View {
         } else {
             print("[navigateToPhotoEditor] No CGImage found!")
         }
+        
+        // Corrige a orientação antes de qualquer outro processamento
+        let orientationFixedPhoto = photo.fixOrientation()
+        
         // Always ensure the image is MetalPetal-safe before editing
-        if let safePhoto = photo.withAlpha() {
+        if let safePhoto = orientationFixedPhoto.withAlpha() {
             if let cgImage = safePhoto.cgImage {
                 print("[navigateToPhotoEditor] SAFE size: \(safePhoto.size), alphaInfo: \(cgImage.alphaInfo), bitsPerPixel: \(cgImage.bitsPerPixel)")
             }
@@ -101,7 +105,12 @@ struct ContentView: View {
 
     func loadPhotos() {
         if let data = UserDefaults.standard.array(forKey: "savedPhotos") as? [Data] {
-            photos = data.compactMap { UIImage(data: $0)?.withAlpha() }
+            photos = data.compactMap { 
+                if let loadedImage = UIImage(data: $0) {
+                    return loadedImage.fixOrientation().withAlpha()
+                }
+                return nil
+            }
         }
     }
 }

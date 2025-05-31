@@ -10,19 +10,35 @@ import SwiftUI
 struct BoxBlankStyle: ViewModifier {
     var cornerRadius: CGFloat = 10
     var padding: CGFloat = 16
-    var size: CGFloat = 50
+    var width: CGFloat? = nil
+    var maxWidth: CGFloat? = nil
+    var height: CGFloat? = nil
+    var maxHeight: CGFloat? = nil
     
     func body(content: Content) -> some View {
-        content
-            .frame(width: size, height: size)
+        var view = AnyView(content)
+        if width != nil || height != nil {
+            view = AnyView(view.frame(width: width, height: height))
+        }
+        if maxWidth != nil || maxHeight != nil {
+            view = AnyView(view.frame(maxWidth: maxWidth, maxHeight: maxHeight))
+        }
+        return view
             .padding(padding)
             .fontWeight(.bold)
             .cornerRadius(cornerRadius)
             .foregroundColor(.primary)
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(Color.primary.opacity(0.1), lineWidth: 1)
-                    .frame(maxWidth: size, maxHeight: size)
+                    .stroke(Color.primary.opacity(0.3), lineWidth: 1)
+                    .frame(maxWidth: maxWidth ?? width, maxHeight: maxHeight ?? height)
             )
+    }
+}
+
+// Extensão para facilitar o uso do BoxBlankStyle
+extension View {
+    public func boxBlankStyle(cornerRadius: CGFloat = 10, padding: CGFloat = 16, width: CGFloat? = nil, maxWidth: CGFloat? = nil, height: CGFloat? = nil, maxHeight: CGFloat? = nil) -> some View {
+        self.modifier(BoxBlankStyle(cornerRadius: cornerRadius, padding: padding, width: width, maxWidth: maxWidth, height: height, maxHeight: maxHeight))
     }
 }

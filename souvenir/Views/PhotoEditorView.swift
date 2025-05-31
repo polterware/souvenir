@@ -9,7 +9,7 @@ struct PhotoEditorView: View {
     @State private var lastZoomScale: CGFloat = 1.0
     @State private var bottomSize: CGFloat = 0.25
     @State private var selectedCategory: String = "filters"
-
+    @EnvironmentObject private var colorSchemeManager: ColorSchemeManager
     @StateObject private var viewModel: PhotoEditorViewModel
 
     init(photo: UIImage, namespace: Namespace.ID, matchedID: String) {
@@ -72,8 +72,8 @@ struct PhotoEditorView: View {
                         Spacer()
                     }
                     .padding(.vertical)
-                    .background(.thinMaterial)
-                    .frame(height: geometry.size.height * 0.27)
+                    .background(colorSchemeManager.primaryColor)
+                    .frame(height: geometry.size.height * 0.28)
                     .padding(.bottom, geometry.safeAreaInsets.bottom)
                 }
                 

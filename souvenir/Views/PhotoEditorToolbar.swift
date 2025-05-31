@@ -12,16 +12,17 @@ struct PhotoEditorToolbar: View {
     @Binding var bottomSize: CGFloat
 
     var body: some View {
-        HStack {
-            Spacer()
+        HStack(spacing: 8) {
+            
             CategoryButton(category: "filters", icon: "paintpalette", selectedCategory: $selectedCategory, bottomSize: $bottomSize, targetSize: 0.25)
-            Spacer()
-            CategoryButton(category: "edit", icon: "slider.horizontal.3", selectedCategory: $selectedCategory, bottomSize: $bottomSize, targetSize: 0.30)
-            Spacer()
+            
             CategoryButton(category: "sticker", icon: "seal", selectedCategory: $selectedCategory, bottomSize: $bottomSize, targetSize: 0.25)
-            Spacer()
+            
+            CategoryButton(category: "edit", icon: "slider.horizontal.3", selectedCategory: $selectedCategory, bottomSize: $bottomSize, targetSize: 0.30)
         }
         .padding(.horizontal)
+
+        
     }
 }
 
@@ -31,6 +32,7 @@ struct CategoryButton: View {
     @Binding var selectedCategory: String
     @Binding var bottomSize: CGFloat
     let targetSize: CGFloat
+    @EnvironmentObject private var colorSchemeManager: ColorSchemeManager
 
     var body: some View {
         Button(action: {
@@ -41,9 +43,14 @@ struct CategoryButton: View {
                 Image(systemName: icon)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 20, height: 20)
-                    .foregroundColor(selectedCategory == category ? .purple : .gray)
+                    .frame(width: 16, height: 16)
+                    .foregroundColor(selectedCategory == category ? colorSchemeManager.primaryColor : colorSchemeManager.secondaryColor)
             }
+            .padding(.vertical, 8)
+            .padding(.horizontal)
+            .boxBlankStyle(cornerRadius: 12, padding: 0, maxWidth: CGFloat.infinity, height: 40)
+            .background(selectedCategory == category ? colorSchemeManager.secondaryColor : Color.clear)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
     }
 }

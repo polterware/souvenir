@@ -21,6 +21,8 @@ struct PhotoEditorAdjustments: View {
     @Binding var opacity: Float
     @Binding var colorInvert: Float
     @State private var selectedAdjustment: String = "contrast"
+    @EnvironmentObject private var colorSchemeManager: ColorSchemeManager
+
     let adjustments: [Adjustment] = [
         Adjustment(id: "contrast", label: "Contraste", icon: "circle.lefthalf.fill"),
         Adjustment(id: "brightness", label: "Brilho", icon: "sun.max"),
@@ -29,28 +31,32 @@ struct PhotoEditorAdjustments: View {
         Adjustment(id: "opacity", label: "Opacidade", icon: "circle.dashed"),
         Adjustment(id: "colorInvert", label: "Inverter", icon: "circle.righthalf.filled")
     ]
+    
+    
     var body: some View {
         VStack {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
+                HStack(spacing: 8) {
                     ForEach(adjustments) { adj in
                         Button(action: { selectedAdjustment = adj.id }) {
                             VStack {
                                 Image(systemName: adj.icon)
-                                    .font(.title2)
-                                    .foregroundColor(selectedAdjustment == adj.id ? .accentColor : .gray)
+                                    .frame(width: 16, height: 16)
+                                    .foregroundColor(selectedAdjustment == adj.id  ? colorSchemeManager.primaryColor : colorSchemeManager.secondaryColor)
                                 Text(adj.label)
                                     .font(.caption2)
-                                    .foregroundColor(selectedAdjustment == adj.id ? .accentColor : .gray)
+                                    .foregroundColor(selectedAdjustment == adj.id  ? colorSchemeManager.primaryColor : colorSchemeManager.secondaryColor)
                             }
                             .padding(8)
-                            .background(selectedAdjustment == adj.id ? Color.accentColor.opacity(0.15) : Color.clear)
-                            .cornerRadius(8)
+                            .boxBlankStyle(cornerRadius: 12, padding: 0, width: 80)
+                            .background(selectedAdjustment == adj.id  ? colorSchemeManager.secondaryColor : Color.clear)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
                     }
                 }
                 .padding(.horizontal)
             }
+            
             Group {
                 if selectedAdjustment == "contrast" {
                     Slider(
@@ -138,6 +144,7 @@ struct PhotoEditorAdjustments: View {
                         .foregroundColor(.gray)
                 }
             }
+           
         }
     }
 }

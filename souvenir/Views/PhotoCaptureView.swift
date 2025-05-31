@@ -1,6 +1,7 @@
 import SwiftUI
 import AVFoundation
 import Foundation
+import UIKit  // Adicionado para garantir que UIImage está disponível
 
 struct PhotoCaptureView: View {
     var onPhotoCaptured: (UIImage) -> Void
@@ -110,9 +111,9 @@ struct PhotoCaptureView: View {
             Spacer()
         }
         .navigationBarBackButtonHidden(true)
-        .onChange(of: capturedImage) { _, newImage in
+        .onChange(of: capturedImage) { newImage in
             if let image = newImage {
-                onPhotoCaptured(image)
+                onPhotoCaptured(image.fixOrientation())
             }
         }
         .padding(.top)
