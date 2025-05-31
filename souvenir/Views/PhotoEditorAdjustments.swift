@@ -18,12 +18,14 @@ struct PhotoEditorAdjustments: View {
     @Binding var brightness: Float
     @Binding var exposure: Float
     @Binding var saturation: Float
+    @Binding var opacity: Float
     @State private var selectedAdjustment: String = "contrast"
     let adjustments: [Adjustment] = [
         Adjustment(id: "contrast", label: "Contraste", icon: "circle.lefthalf.fill"),
         Adjustment(id: "brightness", label: "Brilho", icon: "sun.max"),
         Adjustment(id: "exposure", label: "Exposição", icon: "sunrise"),
-        Adjustment(id: "saturation", label: "Saturação", icon: "drop")
+        Adjustment(id: "saturation", label: "Saturação", icon: "drop"),
+        Adjustment(id: "opacity", label: "Opacidade", icon: "circle.dashed")
     ]
     var body: some View {
         VStack {
@@ -102,6 +104,20 @@ struct PhotoEditorAdjustments: View {
                     .accentColor(.blue)
                     .padding(.horizontal)
                     Text("Saturação: \(String(format: "%.2f", saturation))")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                } else if selectedAdjustment == "opacity" {
+                    Slider(
+                        value: Binding(
+                            get: { Double(opacity) },
+                            set: { newValue in opacity = Float(newValue) }
+                        ),
+                        in: 0.0...1.0,
+                        step: 0.01
+                    )
+                    .accentColor(.gray)
+                    .padding(.horizontal)
+                    Text("Opacidade: \(String(format: "%.2f", opacity))")
                         .font(.caption)
                         .foregroundColor(.gray)
                 }

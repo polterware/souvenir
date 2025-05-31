@@ -17,6 +17,7 @@ struct PhotoEditState: Equatable {
     var brightness: Float = 0.0 // valor padrão neutro
     var exposure: Float = 0.0 // valor padrão neutro
     var saturation: Float = 1.0 // valor padrão neutro
+    var opacity: Float = 1.0 // valor padrão neutro (totalmente opaco)
     // Adicione outros parâmetros depois
 }
 
@@ -84,7 +85,12 @@ class PhotoEditorViewModel: ObservableObject {
         let contrastFilter = MTIContrastFilter()
         contrastFilter.inputImage = brightImage
         contrastFilter.contrast = state.contrast
-        guard let outputImage = contrastFilter.outputImage else { return }
+        guard let contrastImage = contrastFilter.outputImage else { return }
+        // Filtro de opacidade (usando MTIOpacityFilter especializado)
+        let opacityFilter = MTIOpacityFilter()
+        opacityFilter.inputImage = contrastImage
+        opacityFilter.opacity = state.opacity
+        guard let outputImage = opacityFilter.outputImage else { return }
         do {
             let cgimg = try mtiContext.makeCGImage(from: outputImage)
             let uiImage = UIImage(cgImage: cgimg)
