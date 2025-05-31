@@ -66,7 +66,7 @@ struct PhotoEditorAdjustments: View {
                             set: { newValue in contrast = Float(newValue) }
                         ),
                         in: 0.5...1.5,
-                        step: 0.1,
+                        step: 0.3,
                         snap: .fraction,
                         tick: .fraction,
                     )
@@ -78,7 +78,9 @@ struct PhotoEditorAdjustments: View {
                             set: { newValue in brightness = Float(newValue) }
                         ),
                         in: -0.5...0.5,
-                        step: 0.1
+                        step: 0.1,
+                        snap: .fraction,
+                        tick: .fraction,
                     )
                     .padding(.horizontal)
                 } else if selectedAdjustment == "exposure" {
@@ -88,7 +90,9 @@ struct PhotoEditorAdjustments: View {
                             set: { newValue in exposure = Float(newValue) }
                         ),
                         in: -2.0...2.0,
-                        step: 0.5
+                        step: 0.5,
+                        snap: .fraction,
+                        tick: .fraction,
                     )
                     .padding(.horizontal)
                 } else if selectedAdjustment == "saturation" {
@@ -98,7 +102,9 @@ struct PhotoEditorAdjustments: View {
                             set: { newValue in saturation = Float(newValue) }
                         ),
                         in: 0.0...2.0,
-                        step: 0.5
+                        step: 0.5,
+                        snap: .fraction,
+                        tick: .fraction,
                     )
                     .padding(.horizontal)
                 } else if selectedAdjustment == "opacity" {
@@ -108,7 +114,9 @@ struct PhotoEditorAdjustments: View {
                             set: { newValue in opacity = Float(newValue) }
                         ),
                         in: 0.0...1.0,
-                        step: 0.1
+                        step: 0.1,
+                        snap: .fraction,
+                        tick: .fraction,
                     )
                     .padding(.horizontal)
                 } else if selectedAdjustment == "colorInvert" {
@@ -118,7 +126,9 @@ struct PhotoEditorAdjustments: View {
                             set: { newValue in colorInvert = Float(newValue) }
                         ),
                         in: 0.0...1.0,
-                        step: 0.1
+                        step: 0.1,
+                        snap: .fraction,
+                        tick: .fraction,
                     )
                     .padding(.horizontal)
                 }
