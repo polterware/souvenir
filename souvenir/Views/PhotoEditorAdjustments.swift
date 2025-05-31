@@ -19,13 +19,15 @@ struct PhotoEditorAdjustments: View {
     @Binding var exposure: Float
     @Binding var saturation: Float
     @Binding var opacity: Float
+    @Binding var colorInvert: Float
     @State private var selectedAdjustment: String = "contrast"
     let adjustments: [Adjustment] = [
         Adjustment(id: "contrast", label: "Contraste", icon: "circle.lefthalf.fill"),
         Adjustment(id: "brightness", label: "Brilho", icon: "sun.max"),
         Adjustment(id: "exposure", label: "Exposição", icon: "sunrise"),
         Adjustment(id: "saturation", label: "Saturação", icon: "drop"),
-        Adjustment(id: "opacity", label: "Opacidade", icon: "circle.dashed")
+        Adjustment(id: "opacity", label: "Opacidade", icon: "circle.dashed"),
+        Adjustment(id: "colorInvert", label: "Inverter", icon: "circle.righthalf.filled")
     ]
     var body: some View {
         VStack {
@@ -118,6 +120,20 @@ struct PhotoEditorAdjustments: View {
                     .accentColor(.gray)
                     .padding(.horizontal)
                     Text("Opacidade: \(String(format: "%.2f", opacity))")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                } else if selectedAdjustment == "colorInvert" {
+                    Slider(
+                        value: Binding(
+                            get: { Double(colorInvert) },
+                            set: { newValue in colorInvert = Float(newValue) }
+                        ),
+                        in: 0.0...1.0,
+                        step: 0.01
+                    )
+                    .accentColor(.black)
+                    .padding(.horizontal)
+                    Text("Inverter: \(String(format: "%.2f", colorInvert))")
                         .font(.caption)
                         .foregroundColor(.gray)
                 }

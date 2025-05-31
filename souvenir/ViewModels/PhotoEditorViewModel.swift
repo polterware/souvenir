@@ -18,6 +18,7 @@ struct PhotoEditState: Equatable {
     var exposure: Float = 0.0 // valor padrão neutro
     var saturation: Float = 1.0 // valor padrão neutro
     var opacity: Float = 1.0 // valor padrão neutro (totalmente opaco)
+    var colorInvert: Float = 0.0 // valor padrão neutro (sem inversão)
     // Adicione outros parâmetros depois
 }
 
@@ -75,11 +76,10 @@ class PhotoEditorViewModel: ObservableObject {
         exposureFilter.inputImage = saturatedImage
         exposureFilter.exposure = state.exposure
         guard let exposureImage = exposureFilter.outputImage else { return }
-        // Filtro de brilho (MTIColorMatrixFilter)
-        let brightnessFilter = MTIColorMatrixFilter()
+        // Filtro de brilho (MTIBrightnessFilter específico)
+        let brightnessFilter = MTIBrightnessFilter()
         brightnessFilter.inputImage = exposureImage
-        let bias = SIMD4<Float>(state.brightness, state.brightness, state.brightness, 0)
-        brightnessFilter.colorMatrix = MTIColorMatrix(matrix: matrix_identity_float4x4, bias: bias)
+        brightnessFilter.brightness = state.brightness
         guard let brightImage = brightnessFilter.outputImage else { return }
         // Filtro de contraste
         let contrastFilter = MTIContrastFilter()
@@ -90,9 +90,32 @@ class PhotoEditorViewModel: ObservableObject {
         let opacityFilter = MTIOpacityFilter()
         opacityFilter.inputImage = contrastImage
         opacityFilter.opacity = state.opacity
-        guard let outputImage = opacityFilter.outputImage else { return }
+        guard let opacityImage = opacityFilter.outputImage else { return }
+        
+        // Filtro de inversão de cores (quando colorInvert > 0)
+        let finalImage: MTIImage
+        if state.colorInvert > 0.0 {
+            let invertFilter = MTIColorInvertFilter()
+            invertFilter.inputImage = opacityImage
+            guard let invertedImage = invertFilter.outputImage else { return }
+            
+            // Se colorInvert < 1.0, fazemos um blend entre a imagem original e a invertida
+            if state.colorInvert < 1.0 {
+                let blendFilter = MTIBlendFilter(blendMode: .normal)
+                blendFilter.inputImage = invertedImage
+                blendFilter.inputBackgroundImage = opacityImage
+                blendFilter.intensity = state.colorInvert
+                guard let blendedImage = blendFilter.outputImage else { return }
+                finalImage = blendedImage
+            } else {
+                finalImage = invertedImage
+            }
+        } else {
+            finalImage = opacityImage
+        }
+        
         do {
-            let cgimg = try mtiContext.makeCGImage(from: outputImage)
+            let cgimg = try mtiContext.makeCGImage(from: finalImage)
             let uiImage = UIImage(cgImage: cgimg)
             DispatchQueue.main.async {
                 self.previewImage = uiImage
