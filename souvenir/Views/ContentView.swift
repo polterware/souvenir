@@ -39,7 +39,7 @@ struct ContentView: View {
                 Task {
                     for item in newItems {
                         if let data = try? await item.loadTransferable(type: Data.self),
-                           let uiImage = UIImage(data: data) {
+                           let uiImage = UIImage(data: data)?.withAlpha() {
                             photos.append(uiImage)
                         }
                     }
@@ -52,8 +52,10 @@ struct ContentView: View {
             }
             .navigationDestination(isPresented: $showCamera) {
                 PhotoCaptureView(onPhotoCaptured: { photo in
-                    photos.append(photo)
-                    savePhotos()
+                    if let safePhoto = photo.withAlpha() {
+                        photos.append(safePhoto)
+                        savePhotos()
+                    }
                 })
                 .navigationTransition(
                     .zoom(
@@ -74,17 +76,32 @@ struct ContentView: View {
     }
 
     func navigateToPhotoEditor(photo: UIImage) {
-        selectedPhotoForEditor = photo
+        // Log image info before editing
+        if let cgImage = photo.cgImage {
+            print("[navigateToPhotoEditor] size: \(photo.size), alphaInfo: \(cgImage.alphaInfo), bitsPerPixel: \(cgImage.bitsPerPixel)")
+        } else {
+            print("[navigateToPhotoEditor] No CGImage found!")
+        }
+        // Always ensure the image is MetalPetal-safe before editing
+        if let safePhoto = photo.withAlpha() {
+            if let cgImage = safePhoto.cgImage {
+                print("[navigateToPhotoEditor] SAFE size: \(safePhoto.size), alphaInfo: \(cgImage.alphaInfo), bitsPerPixel: \(cgImage.bitsPerPixel)")
+            }
+            selectedPhotoForEditor = safePhoto
+        } else {
+            print("[ContentView] Failed to prepare image for editor (withAlpha failed)")
+            // Optionally show an alert here
+        }
     }
 
     func savePhotos() {
-        let data = photos.compactMap { $0.jpegData(compressionQuality: 0.8) }
+        let data = photos.compactMap { $0.pngData() }
         UserDefaults.standard.set(data, forKey: "savedPhotos")
     }
 
     func loadPhotos() {
         if let data = UserDefaults.standard.array(forKey: "savedPhotos") as? [Data] {
-            photos = data.compactMap { UIImage(data: $0) }
+            photos = data.compactMap { UIImage(data: $0)?.withAlpha() }
         }
     }
 }

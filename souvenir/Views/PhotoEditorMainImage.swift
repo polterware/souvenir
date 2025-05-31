@@ -34,6 +34,7 @@ struct PhotoEditorMainImage: View {
                             }
                     )
                     .cornerRadius(20)
+                    .animation(nil, value: filtered) // Evita flicker/swiftui animation
             } else if let original = image {
                 Image(uiImage: original)
                     .resizable()

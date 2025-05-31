@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct PhotoEditorView: View {
     let namespace: Namespace.ID
@@ -22,8 +23,8 @@ struct PhotoEditorView: View {
             GeometryReader { geometry in
                 VStack(spacing: 0) {
                     PhotoEditorMainImage(
-                        image: $viewModel.image,
-                        filteredImage: $viewModel.filteredImage,
+                        image: $viewModel.previewBase, // mostra a original se não houver preview
+                        filteredImage: $viewModel.previewImage,
                         matchedID: matchedID,
                         namespace: namespace,
                         zoomScale: $zoomScale,
@@ -38,26 +39,13 @@ struct PhotoEditorView: View {
                         ZStack {
                             switch selectedCategory {
                             case "filters":
-                                PhotoEditorFilters(
-                                    image: $viewModel.image,
-                                    previewCache: $viewModel.previewCache,
-                                    applyFilter: viewModel.applyFilter
-                                )
-                                .transition(.move(edge: .bottom).combined(with: .opacity))
+                                // Desabilita filtros por enquanto, pois ViewModel foi refatorado e não tem mais image, previewCache ou applyFilter
+                                Text("Filtros desabilitados nesta versão").padding()
+                                    .transition(.move(edge: .bottom).combined(with: .opacity))
                             case "edit":
                                 PhotoEditorAdjustments(
-                                    sliderValue: $viewModel.sliderValue,
-                                    selectedEditOption: $viewModel.selectedEditOption,
-                                    brightnessValue: $viewModel.brightnessValue,
-                                    contrastValue: $viewModel.contrastValue,
-                                    saturationValue: $viewModel.saturationValue,
-                                    exposureValue: $viewModel.exposureValue,
-                                    sharpnessValue: $viewModel.sharpnessValue,
-                                    grainValue: $viewModel.grainValue,
-                                    whitePointValue: $viewModel.whitePointValue,
-                                    isEditing: $viewModel.isEditing,
-                                    applyAllEditAdjustments: viewModel.applyAllEditAdjustments,
-                                    updateOptionValue: viewModel.updateOptionValue
+                                    contrast: $viewModel.editState.contrast,
+                                    brightness: $viewModel.editState.brightness
                                 )
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
                             case "sticker":
