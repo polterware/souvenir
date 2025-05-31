@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SlidingRuler
 
 struct Adjustment: Identifiable, Hashable {
     let id: String // unique key
@@ -59,89 +60,67 @@ struct PhotoEditorAdjustments: View {
             
             Group {
                 if selectedAdjustment == "contrast" {
-                    Slider(
+                    SlidingRuler(
                         value: Binding(
                             get: { Double(contrast) },
                             set: { newValue in contrast = Float(newValue) }
                         ),
                         in: 0.5...1.5,
-                        step: 0.01
+                        step: 0.1,
+                        snap: .fraction,
+                        tick: .fraction,
                     )
-                    .accentColor(.purple)
                     .padding(.horizontal)
-                    Text("Contraste: \(String(format: "%.2f", contrast))")
-                        .font(.caption)
-                        .foregroundColor(.gray)
                 } else if selectedAdjustment == "brightness" {
-                    Slider(
+                    SlidingRuler(
                         value: Binding(
                             get: { Double(brightness) },
                             set: { newValue in brightness = Float(newValue) }
                         ),
                         in: -0.5...0.5,
-                        step: 0.01
+                        step: 0.1
                     )
-                    .accentColor(.yellow)
                     .padding(.horizontal)
-                    Text("Brilho: \(String(format: "%.2f", brightness))")
-                        .font(.caption)
-                        .foregroundColor(.gray)
                 } else if selectedAdjustment == "exposure" {
-                    Slider(
+                    SlidingRuler(
                         value: Binding(
                             get: { Double(exposure) },
                             set: { newValue in exposure = Float(newValue) }
                         ),
                         in: -2.0...2.0,
-                        step: 0.01
+                        step: 0.5
                     )
-                    .accentColor(.orange)
                     .padding(.horizontal)
-                    Text("Exposição: \(String(format: "%.2f", exposure))")
-                        .font(.caption)
-                        .foregroundColor(.gray)
                 } else if selectedAdjustment == "saturation" {
-                    Slider(
+                    SlidingRuler(
                         value: Binding(
                             get: { Double(saturation) },
                             set: { newValue in saturation = Float(newValue) }
                         ),
                         in: 0.0...2.0,
-                        step: 0.01
+                        step: 0.5
                     )
-                    .accentColor(.blue)
                     .padding(.horizontal)
-                    Text("Saturação: \(String(format: "%.2f", saturation))")
-                        .font(.caption)
-                        .foregroundColor(.gray)
                 } else if selectedAdjustment == "opacity" {
-                    Slider(
+                    SlidingRuler(
                         value: Binding(
                             get: { Double(opacity) },
                             set: { newValue in opacity = Float(newValue) }
                         ),
                         in: 0.0...1.0,
-                        step: 0.01
+                        step: 0.1
                     )
-                    .accentColor(.gray)
                     .padding(.horizontal)
-                    Text("Opacidade: \(String(format: "%.2f", opacity))")
-                        .font(.caption)
-                        .foregroundColor(.gray)
                 } else if selectedAdjustment == "colorInvert" {
-                    Slider(
+                    SlidingRuler(
                         value: Binding(
                             get: { Double(colorInvert) },
                             set: { newValue in colorInvert = Float(newValue) }
                         ),
                         in: 0.0...1.0,
-                        step: 0.01
+                        step: 0.1
                     )
-                    .accentColor(.black)
                     .padding(.horizontal)
-                    Text("Inverter: \(String(format: "%.2f", colorInvert))")
-                        .font(.caption)
-                        .foregroundColor(.gray)
                 }
             }
            

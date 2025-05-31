@@ -1,5 +1,5 @@
 {
-  "originHash" : "3ab3fe62fad83974d10b80340a938785c60c634d7d9ca7beff897948f261a5b4",
+  "originHash" : "b121a69ae96d8c56f3193f6d960f02cc9d548d68eeb5c8644b5b262ff9c690dc",
   "pins" : [
     {
       "identity" : "brightroom",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "a163f2809431b81f521aaf2c9d89455a05f06ffa",
         "version" : "3.1.1"
+      }
+    },
+    {
+      "identity" : "coregeometry",
+      "kind" : "remoteSourceControl",
+      "location" : "https://gitlab.com/Pyroh/CoreGeometry.git",
+      "state" : {
+        "revision" : "c8604b90dc60084e9d08f289573e537585b84129",
+        "version" : "4.0.0"
       }
     },
     {
@@ -53,6 +62,24 @@
       "state" : {
         "revision" : "5dd1907d64f0d36f158f61a466bab75067224893",
         "version" : "6.9.0"
+      }
+    },
+    {
+      "identity" : "slidingruler",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Pyroh/SlidingRuler",
+      "state" : {
+        "revision" : "707b15e0ade64b488e7146a487cc5ee9570af9fa",
+        "version" : "0.2.0"
+      }
+    },
+    {
+      "identity" : "smoothoperators",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Pyroh/SmoothOperators.git",
+      "state" : {
+        "revision" : "dd013309755d75d8636fd7fb89bb25da34b92c7e",
+        "version" : "0.20.0"
       }
     },
     {

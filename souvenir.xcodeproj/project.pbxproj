@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2C58691B2DEBB617006E61F1 /* SlidingRuler in Frameworks */ = {isa = PBXBuildFile; productRef = 2C58691A2DEBB617006E61F1 /* SlidingRuler */; };
 		2CA967D42DAB8DAE002C6D35 /* FluidGradient in Frameworks */ = {isa = PBXBuildFile; productRef = 2CA967D32DAB8DAE002C6D35 /* FluidGradient */; };
 		2CA967F52DAEDD35002C6D35 /* MetalPetal in Frameworks */ = {isa = PBXBuildFile; productRef = 2CA967F42DAEDD35002C6D35 /* MetalPetal */; };
 		2CB568AA2C7CB9B50027924C /* souvenirApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB568A92C7CB9B50027924C /* souvenirApp.swift */; };
@@ -90,6 +91,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C58691B2DEBB617006E61F1 /* SlidingRuler in Frameworks */,
 				77334B806A41780F0F4E981A /* Pods_souvenir.framework in Frameworks */,
 				2CA967F52DAEDD35002C6D35 /* MetalPetal in Frameworks */,
 				2CA967D42DAB8DAE002C6D35 /* FluidGradient in Frameworks */,
@@ -310,6 +312,7 @@
 				2C5C54A42DAB8C3E003F5A61 /* XCRemoteSwiftPackageReference "FluidGradient" */,
 				2CA967F32DAEDD35002C6D35 /* XCRemoteSwiftPackageReference "MetalPetal" */,
 				2CA968002DAFF42E002C6D35 /* XCRemoteSwiftPackageReference "Brightroom" */,
+				2CD17E7F2DEBB46600D398A2 /* XCRemoteSwiftPackageReference "SlidingRuler" */,
 			);
 			productRefGroup = 2CB568A72C7CB9B50027924C /* Products */;
 			projectDirPath = "";
@@ -791,9 +794,22 @@
 				minimumVersion = 3.1.1;
 			};
 		};
+		2CD17E7F2DEBB46600D398A2 /* XCRemoteSwiftPackageReference "SlidingRuler" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Pyroh/SlidingRuler";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		2C58691A2DEBB617006E61F1 /* SlidingRuler */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2CD17E7F2DEBB46600D398A2 /* XCRemoteSwiftPackageReference "SlidingRuler" */;
+			productName = SlidingRuler;
+		};
 		2CA967D32DAB8DAE002C6D35 /* FluidGradient */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2C5C54A42DAB8C3E003F5A61 /* XCRemoteSwiftPackageReference "FluidGradient" */;
