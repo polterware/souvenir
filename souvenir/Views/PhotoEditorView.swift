@@ -46,7 +46,8 @@ struct PhotoEditorView: View {
                                 PhotoEditorAdjustments(
                                     contrast: $viewModel.editState.contrast,
                                     brightness: $viewModel.editState.brightness,
-                                    exposure: $viewModel.editState.exposure
+                                    exposure: $viewModel.editState.exposure,
+                                    saturation: $viewModel.editState.saturation
                                 )
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
                             case "sticker":

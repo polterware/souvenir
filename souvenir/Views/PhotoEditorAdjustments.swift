@@ -11,6 +11,7 @@ struct PhotoEditorAdjustments: View {
     @Binding var contrast: Float
     @Binding var brightness: Float
     @Binding var exposure: Float
+    @Binding var saturation: Float
     var body: some View {
         VStack {
             Slider(
@@ -52,6 +53,20 @@ struct PhotoEditorAdjustments: View {
             .accentColor(.orange)
             .padding(.horizontal)
             Text("Exposição: \(String(format: "%.2f", exposure))")
+                .font(.caption)
+                .foregroundColor(.gray)
+
+            Slider(
+                value: Binding(
+                    get: { Double(saturation) },
+                    set: { newValue in saturation = Float(newValue) }
+                ),
+                in: 0.0...2.0,
+                step: 0.01
+            )
+            .accentColor(.blue)
+            .padding(.horizontal)
+            Text("Saturação: \(String(format: "%.2f", saturation))")
                 .font(.caption)
                 .foregroundColor(.gray)
         }

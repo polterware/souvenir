@@ -16,6 +16,7 @@ struct PhotoEditState: Equatable {
     var contrast: Float = 1.0
     var brightness: Float = 0.0 // valor padrão neutro
     var exposure: Float = 0.0 // valor padrão neutro
+    var saturation: Float = 1.0 // valor padrão neutro
     // Adicione outros parâmetros depois
 }
 
@@ -63,9 +64,14 @@ class PhotoEditorViewModel: ObservableObject {
         }
         // Tente isOpaque: true para contornar bug de alphaTypeHandlingRule
         let mtiImage = MTIImage(cgImage: cgImage, options: [.SRGB: false], isOpaque: true)
+        // Filtro de saturação (MTISaturationFilter)
+        let saturationFilter = MTISaturationFilter()
+        saturationFilter.inputImage = mtiImage
+        saturationFilter.saturation = state.saturation
+        guard let saturatedImage = saturationFilter.outputImage else { return }
         // Filtro de exposição (MTIExposureFilter)
         let exposureFilter = MTIExposureFilter()
-        exposureFilter.inputImage = mtiImage
+        exposureFilter.inputImage = saturatedImage
         exposureFilter.exposure = state.exposure
         guard let exposureImage = exposureFilter.outputImage else { return }
         // Filtro de brilho (MTIColorMatrixFilter)
