@@ -36,6 +36,11 @@ struct PhotoEditorAdjustments: View {
     
     var body: some View {
         VStack {
+            if let selected = adjustments.first(where: { $0.id == selectedAdjustment }) {
+                Text(selected.label)
+                    .font(.caption2)
+                    .foregroundColor(colorSchemeManager.secondaryColor)
+            }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(adjustments) { adj in
@@ -44,14 +49,12 @@ struct PhotoEditorAdjustments: View {
                                 Image(systemName: adj.icon)
                                     .frame(width: 16, height: 16)
                                     .foregroundColor(selectedAdjustment == adj.id  ? colorSchemeManager.primaryColor : colorSchemeManager.secondaryColor)
-                                Text(adj.label)
-                                    .font(.caption2)
-                                    .foregroundColor(selectedAdjustment == adj.id  ? colorSchemeManager.primaryColor : colorSchemeManager.secondaryColor)
+
                             }
                             .padding(8)
-                            .boxBlankStyle(cornerRadius: 12, padding: 0, width: 80)
+                            .boxBlankStyle(cornerRadius: .infinity, padding: 10)
                             .background(selectedAdjustment == adj.id  ? colorSchemeManager.secondaryColor : Color.clear)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .clipShape(RoundedRectangle(cornerRadius: .infinity))
                         }
                     }
                 }
@@ -60,80 +63,123 @@ struct PhotoEditorAdjustments: View {
             
             Group {
                 if selectedAdjustment == "contrast" {
-                    SlidingRuler(
-                        value: Binding(
-                            get: { Double(contrast) },
-                            set: { newValue in contrast = Float(newValue) }
-                        ),
-                        in: 0.5...1.5,
-                        step: 0.3,
-                        snap: .fraction,
-                        tick: .fraction,
-                    )
-                    .padding(.horizontal)
+                    ContrastSlider(value: $contrast)
+                        .padding(.horizontal)
                 } else if selectedAdjustment == "brightness" {
-                    SlidingRuler(
-                        value: Binding(
-                            get: { Double(brightness) },
-                            set: { newValue in brightness = Float(newValue) }
-                        ),
-                        in: -0.5...0.5,
-                        step: 0.1,
-                        snap: .fraction,
-                        tick: .fraction,
-                    )
-                    .padding(.horizontal)
+                    BrightnessSlider(value: $brightness)
+                        .padding(.horizontal)
                 } else if selectedAdjustment == "exposure" {
-                    SlidingRuler(
-                        value: Binding(
-                            get: { Double(exposure) },
-                            set: { newValue in exposure = Float(newValue) }
-                        ),
-                        in: -2.0...2.0,
-                        step: 0.5,
-                        snap: .fraction,
-                        tick: .fraction,
-                    )
-                    .padding(.horizontal)
+                    ExposureSlider(value: $exposure)
+                        .padding(.horizontal)
                 } else if selectedAdjustment == "saturation" {
-                    SlidingRuler(
-                        value: Binding(
-                            get: { Double(saturation) },
-                            set: { newValue in saturation = Float(newValue) }
-                        ),
-                        in: 0.0...2.0,
-                        step: 0.5,
-                        snap: .fraction,
-                        tick: .fraction,
-                    )
-                    .padding(.horizontal)
+                    SaturationSlider(value: $saturation)
+                        .padding(.horizontal)
                 } else if selectedAdjustment == "opacity" {
-                    SlidingRuler(
-                        value: Binding(
-                            get: { Double(opacity) },
-                            set: { newValue in opacity = Float(newValue) }
-                        ),
-                        in: 0.0...1.0,
-                        step: 0.1,
-                        snap: .fraction,
-                        tick: .fraction,
-                    )
-                    .padding(.horizontal)
+                    OpacitySlider(value: $opacity)
+                        .padding(.horizontal)
                 } else if selectedAdjustment == "colorInvert" {
-                    SlidingRuler(
-                        value: Binding(
-                            get: { Double(colorInvert) },
-                            set: { newValue in colorInvert = Float(newValue) }
-                        ),
-                        in: 0.0...1.0,
-                        step: 0.1,
-                        snap: .fraction,
-                        tick: .fraction,
-                    )
-                    .padding(.horizontal)
+                    ColorInvertSlider(value: $colorInvert)
+                        .padding(.horizontal)
                 }
             }
            
         }
     }
 }
+
+private struct ContrastSlider: View {
+    @Binding var value: Float
+    var body: some View {
+        SlidingRuler(
+            value: Binding(
+                get: { Double(value) },
+                set: { newValue in value = Float(newValue) }
+            ),
+            in: 0.5...1.5,
+            step: 0.3,
+            snap: .fraction,
+            tick: .fraction
+        )
+    }
+}
+
+private struct BrightnessSlider: View {
+    @Binding var value: Float
+    var body: some View {
+        SlidingRuler(
+            value: Binding(
+                get: { Double(value) },
+                set: { newValue in value = Float(newValue) }
+            ),
+            in: -0.5...0.5,
+            step: 0.1,
+            snap: .fraction,
+            tick: .fraction
+        )
+    }
+}
+
+private struct ExposureSlider: View {
+    @Binding var value: Float
+    var body: some View {
+        SlidingRuler(
+            value: Binding(
+                get: { Double(value) },
+                set: { newValue in value = Float(newValue) }
+            ),
+            in: -2.0...2.0,
+            step: 0.5,
+            snap: .fraction,
+            tick: .fraction
+        )
+    }
+}
+
+private struct SaturationSlider: View {
+    @Binding var value: Float
+    var body: some View {
+        SlidingRuler(
+            value: Binding(
+                get: { Double(value) },
+                set: { newValue in value = Float(newValue) }
+            ),
+            in: 0.0...2.0,
+            step: 0.5,
+            snap: .fraction,
+            tick: .fraction
+        )
+    }
+}
+
+private struct OpacitySlider: View {
+    @Binding var value: Float
+    var body: some View {
+        SlidingRuler(
+            value: Binding(
+                get: { Double(value) },
+                set: { newValue in value = Float(newValue) }
+            ),
+            in: 0.0...1.0,
+            step: 0.1,
+            snap: .fraction,
+            tick: .fraction
+        )
+    }
+}
+
+private struct ColorInvertSlider: View {
+    @Binding var value: Float
+    var body: some View {
+        SlidingRuler(
+            value: Binding(
+                get: { Double(value) },
+                set: { newValue in value = Float(newValue) }
+            ),
+            in: 0.0...1.0,
+            step: 0.1,
+            snap: .fraction,
+            tick: .fraction
+        )
+    }
+}
+
