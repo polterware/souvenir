@@ -23,6 +23,8 @@ struct PhotoEditorAdjustments: View {
     @Binding var opacity: Float
     @Binding var colorInvert: Float
     @Binding var pixelateAmount: Float
+    @Binding var colorTint: SIMD4<Float>
+    @Binding var colorTintIntensity: Float
     @State private var selectedAdjustment: String = "contrast"
     @EnvironmentObject private var colorSchemeManager: ColorSchemeManager
 
@@ -34,7 +36,8 @@ struct PhotoEditorAdjustments: View {
         Adjustment(id: "vibrance", label: "Vibrance", icon: "waveform.path.ecg"),
         Adjustment(id: "opacity", label: "Opacidade", icon: "circle.dashed"),
         Adjustment(id: "colorInvert", label: "Inverter", icon: "circle.righthalf.filled"),
-        Adjustment(id: "pixelateAmount", label: "Pixelizar", icon: "rectangle.split.3x3")
+        Adjustment(id: "pixelateAmount", label: "Pixelizar", icon: "rectangle.split.3x3"),
+        Adjustment(id: "colorTint", label: "Tint", icon: "paintpalette")
     ]
     
     
@@ -90,6 +93,22 @@ struct PhotoEditorAdjustments: View {
                 } else if selectedAdjustment == "pixelateAmount" {
                     PixelateSlider(value: $pixelateAmount)
                         .padding(.horizontal)
+                } else if selectedAdjustment == "colorTint" {
+                    VStack(spacing: 8) {
+                        ColorTintSlider(value: $colorTintIntensity)
+                            .padding(.horizontal)
+                        ColorPicker("Cor do Tint", selection: Binding(
+                            get: {
+                                Color(red: Double(colorTint.x), green: Double(colorTint.y), blue: Double(colorTint.z), opacity: Double(colorTint.w))
+                            },
+                            set: { newColor in
+                                if let components = newColor.cgColor?.components, components.count >= 3 {
+                                    colorTint = SIMD4<Float>(Float(components[0]), Float(components[1]), Float(components[2]), components.count > 3 ? Float(components[3]) : 1.0)
+                                }
+                            }
+                        ))
+                        .padding(.horizontal)
+                    }
                 }
             }
            
@@ -219,6 +238,22 @@ private struct PixelateSlider: View {
             ),
             in: 1.0...40.0,
             step: 1.0,
+            snap: .fraction,
+            tick: .fraction
+        )
+    }
+}
+
+private struct ColorTintSlider: View {
+    @Binding var value: Float
+    var body: some View {
+        SlidingRuler(
+            value: Binding(
+                get: { Double(value) },
+                set: { newValue in value = Float(newValue) }
+            ),
+            in: 1.0...3.0,
+            step: 0.5,
             snap: .fraction,
             tick: .fraction
         )

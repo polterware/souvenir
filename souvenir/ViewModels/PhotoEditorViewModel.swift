@@ -21,6 +21,9 @@ struct PhotoEditState: Equatable {
     var opacity: Float = 1.0 // valor padrão neutro (totalmente opaco)
     var colorInvert: Float = 0.0 // valor padrão neutro (sem inversão)
     var pixelateAmount: Float = 1.0 // valor padrão neutro (sem pixelate)
+    // Color tint (RGBA, valores de 0 a 1)
+    var colorTint: SIMD4<Float> = SIMD4<Float>(0,0,0,0) // padrão: sem cor
+    var colorTintIntensity: Float = 1.0 // valor médio para que o slider fique no meio
     // Adicione outros parâmetros depois
 }
 
@@ -119,18 +122,44 @@ class PhotoEditorViewModel: ObservableObject {
             pixelatedImage = opacityImage
         }
         
+        // Filtro de color tint (quando uma cor for selecionada, independente da intensidade)
+        let tintedImage: MTIImage
+        if state.colorTint.x > 0.0 || state.colorTint.y > 0.0 || state.colorTint.z > 0.0 {
+            // Força alpha = 1.0 para a cor do tint
+            let color = MTIColor(
+                red: Float(state.colorTint.x),
+                green: Float(state.colorTint.y),
+                blue: Float(state.colorTint.z),
+                alpha: 1.0
+            )
+            let colorImage = MTIImage(color: color, sRGB: false, size: pixelatedImage.size)
+            let blendFilter = MTIBlendFilter(blendMode: .overlay) // ou .softLight para um efeito mais suave
+            blendFilter.inputImage = pixelatedImage
+            blendFilter.inputBackgroundImage = colorImage
+            
+            // Define uma intensidade mínima de 0.1 quando uma cor é selecionada
+            // e permite aumentar até 1.0 conforme o slider
+            let minIntensity: Float = 0.1
+            let finalIntensity = minIntensity + state.colorTintIntensity * (1.0 - minIntensity)
+            
+            blendFilter.intensity = finalIntensity
+            guard let output = blendFilter.outputImage else { return }
+            tintedImage = output
+        } else {
+            tintedImage = pixelatedImage
+        }
+
         // Filtro de inversão de cores (quando colorInvert > 0)
         let finalImage: MTIImage
         if state.colorInvert > 0.0 {
             let invertFilter = MTIColorInvertFilter()
-            invertFilter.inputImage = pixelatedImage
+            invertFilter.inputImage = tintedImage
             guard let invertedImage = invertFilter.outputImage else { return }
-            
             // Se colorInvert < 1.0, fazemos um blend entre a imagem original e a invertida
             if state.colorInvert < 1.0 {
                 let blendFilter = MTIBlendFilter(blendMode: .normal)
                 blendFilter.inputImage = invertedImage
-                blendFilter.inputBackgroundImage = pixelatedImage
+                blendFilter.inputBackgroundImage = tintedImage
                 blendFilter.intensity = state.colorInvert
                 guard let blendedImage = blendFilter.outputImage else { return }
                 finalImage = blendedImage
@@ -138,7 +167,7 @@ class PhotoEditorViewModel: ObservableObject {
                 finalImage = invertedImage
             }
         } else {
-            finalImage = pixelatedImage
+            finalImage = tintedImage
         }
         
         do {
