@@ -48,8 +48,10 @@ struct PhotoEditorView: View {
                                     brightness: $viewModel.editState.brightness,
                                     exposure: $viewModel.editState.exposure,
                                     saturation: $viewModel.editState.saturation,
+                                    vibrance: $viewModel.editState.vibrance,
                                     opacity: $viewModel.editState.opacity,
-                                    colorInvert: $viewModel.editState.colorInvert
+                                    colorInvert: $viewModel.editState.colorInvert,
+                                    pixelateAmount: $viewModel.editState.pixelateAmount
                                 )
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
                             case "sticker":

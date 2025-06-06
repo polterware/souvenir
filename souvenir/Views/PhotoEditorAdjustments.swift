@@ -19,8 +19,10 @@ struct PhotoEditorAdjustments: View {
     @Binding var brightness: Float
     @Binding var exposure: Float
     @Binding var saturation: Float
+    @Binding var vibrance: Float
     @Binding var opacity: Float
     @Binding var colorInvert: Float
+    @Binding var pixelateAmount: Float
     @State private var selectedAdjustment: String = "contrast"
     @EnvironmentObject private var colorSchemeManager: ColorSchemeManager
 
@@ -29,8 +31,10 @@ struct PhotoEditorAdjustments: View {
         Adjustment(id: "brightness", label: "Brilho", icon: "sun.max"),
         Adjustment(id: "exposure", label: "Exposição", icon: "sunrise"),
         Adjustment(id: "saturation", label: "Saturação", icon: "drop"),
+        Adjustment(id: "vibrance", label: "Vibrance", icon: "waveform.path.ecg"),
         Adjustment(id: "opacity", label: "Opacidade", icon: "circle.dashed"),
-        Adjustment(id: "colorInvert", label: "Inverter", icon: "circle.righthalf.filled")
+        Adjustment(id: "colorInvert", label: "Inverter", icon: "circle.righthalf.filled"),
+        Adjustment(id: "pixelateAmount", label: "Pixelizar", icon: "rectangle.split.3x3")
     ]
     
     
@@ -74,11 +78,17 @@ struct PhotoEditorAdjustments: View {
                 } else if selectedAdjustment == "saturation" {
                     SaturationSlider(value: $saturation)
                         .padding(.horizontal)
+                } else if selectedAdjustment == "vibrance" {
+                    VibranceSlider(value: $vibrance)
+                        .padding(.horizontal)
                 } else if selectedAdjustment == "opacity" {
                     OpacitySlider(value: $opacity)
                         .padding(.horizontal)
                 } else if selectedAdjustment == "colorInvert" {
                     ColorInvertSlider(value: $colorInvert)
+                        .padding(.horizontal)
+                } else if selectedAdjustment == "pixelateAmount" {
+                    PixelateSlider(value: $pixelateAmount)
                         .padding(.horizontal)
                 }
             }
@@ -151,6 +161,22 @@ private struct SaturationSlider: View {
     }
 }
 
+private struct VibranceSlider: View {
+    @Binding var value: Float
+    var body: some View {
+        SlidingRuler(
+            value: Binding(
+                get: { Double(value) },
+                set: { newValue in value = Float(newValue) }
+            ),
+            in: -1.0...1.0,
+            step: 0.1,
+            snap: .fraction,
+            tick: .fraction
+        )
+    }
+}
+
 private struct OpacitySlider: View {
     @Binding var value: Float
     var body: some View {
@@ -177,6 +203,22 @@ private struct ColorInvertSlider: View {
             ),
             in: 0.0...1.0,
             step: 0.1,
+            snap: .fraction,
+            tick: .fraction
+        )
+    }
+}
+
+private struct PixelateSlider: View {
+    @Binding var value: Float
+    var body: some View {
+        SlidingRuler(
+            value: Binding(
+                get: { Double(value) },
+                set: { newValue in value = Float(newValue) }
+            ),
+            in: 1.0...40.0,
+            step: 1.0,
             snap: .fraction,
             tick: .fraction
         )

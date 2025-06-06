@@ -17,8 +17,10 @@ struct PhotoEditState: Equatable {
     var brightness: Float = 0.0 // valor padrão neutro
     var exposure: Float = 0.0 // valor padrão neutro
     var saturation: Float = 1.0 // valor padrão neutro
+    var vibrance: Float = 0.0 // valor padrão neutro (sem vibrance)
     var opacity: Float = 1.0 // valor padrão neutro (totalmente opaco)
     var colorInvert: Float = 0.0 // valor padrão neutro (sem inversão)
+    var pixelateAmount: Float = 1.0 // valor padrão neutro (sem pixelate)
     // Adicione outros parâmetros depois
 }
 
@@ -71,9 +73,20 @@ class PhotoEditorViewModel: ObservableObject {
         saturationFilter.inputImage = mtiImage
         saturationFilter.saturation = state.saturation
         guard let saturatedImage = saturationFilter.outputImage else { return }
+        // Filtro de vibrance (MTIVibranceFilter)
+        let vibranceImage: MTIImage
+        if state.vibrance != 0.0 {
+            let vibranceFilter = MTIVibranceFilter()
+            vibranceFilter.inputImage = saturatedImage
+            vibranceFilter.amount = state.vibrance
+            guard let output = vibranceFilter.outputImage else { return }
+            vibranceImage = output
+        } else {
+            vibranceImage = saturatedImage
+        }
         // Filtro de exposição (MTIExposureFilter)
         let exposureFilter = MTIExposureFilter()
-        exposureFilter.inputImage = saturatedImage
+        exposureFilter.inputImage = vibranceImage
         exposureFilter.exposure = state.exposure
         guard let exposureImage = exposureFilter.outputImage else { return }
         // Filtro de brilho (MTIBrightnessFilter específico)
@@ -92,18 +105,32 @@ class PhotoEditorViewModel: ObservableObject {
         opacityFilter.opacity = state.opacity
         guard let opacityImage = opacityFilter.outputImage else { return }
         
+        // Filtro de pixelate (quando pixelateAmount > 1.0)
+        let pixelatedImage: MTIImage
+        if state.pixelateAmount > 1.0 {
+            let pixelateFilter = MTIPixellateFilter()
+            pixelateFilter.inputImage = opacityImage
+            // O scale define o tamanho do pixel, quanto maior, mais pixelado
+            let scale = max(CGFloat(state.pixelateAmount), 1.0)
+            pixelateFilter.scale = CGSize(width: scale, height: scale)
+            guard let output = pixelateFilter.outputImage else { return }
+            pixelatedImage = output
+        } else {
+            pixelatedImage = opacityImage
+        }
+        
         // Filtro de inversão de cores (quando colorInvert > 0)
         let finalImage: MTIImage
         if state.colorInvert > 0.0 {
             let invertFilter = MTIColorInvertFilter()
-            invertFilter.inputImage = opacityImage
+            invertFilter.inputImage = pixelatedImage
             guard let invertedImage = invertFilter.outputImage else { return }
             
             // Se colorInvert < 1.0, fazemos um blend entre a imagem original e a invertida
             if state.colorInvert < 1.0 {
                 let blendFilter = MTIBlendFilter(blendMode: .normal)
                 blendFilter.inputImage = invertedImage
-                blendFilter.inputBackgroundImage = opacityImage
+                blendFilter.inputBackgroundImage = pixelatedImage
                 blendFilter.intensity = state.colorInvert
                 guard let blendedImage = blendFilter.outputImage else { return }
                 finalImage = blendedImage
@@ -111,7 +138,7 @@ class PhotoEditorViewModel: ObservableObject {
                 finalImage = invertedImage
             }
         } else {
-            finalImage = opacityImage
+            finalImage = pixelatedImage
         }
         
         do {
