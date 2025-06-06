@@ -53,7 +53,12 @@ struct PhotoEditorView: View {
                                     colorInvert: $viewModel.editState.colorInvert,
                                     pixelateAmount: $viewModel.editState.pixelateAmount,
                                     colorTint: $viewModel.editState.colorTint,
-                                    colorTintIntensity: $viewModel.editState.colorTintIntensity
+                                    colorTintIntensity: $viewModel.editState.colorTintIntensity,
+                                    duotoneEnabled: $viewModel.editState.duotoneEnabled,
+                                    duotoneShadowColor: $viewModel.editState.duotoneShadowColor,
+                                    duotoneHighlightColor: $viewModel.editState.duotoneHighlightColor,
+                                    duotoneShadowIntensity: $viewModel.editState.duotoneShadowIntensity,
+                                    duotoneHighlightIntensity: $viewModel.editState.duotoneHighlightIntensity
                                 )
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
                             case "sticker":
@@ -77,7 +82,7 @@ struct PhotoEditorView: View {
                     }
                     .padding(.vertical)
                     .background(colorSchemeManager.primaryColor)
-                    .frame(height: geometry.size.height * 0.28)
+                    .frame(minHeight: geometry.size.height * 0.25)
                     .padding(.bottom, geometry.safeAreaInsets.bottom)
                 }
                 

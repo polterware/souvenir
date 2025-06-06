@@ -25,6 +25,11 @@ struct PhotoEditorAdjustments: View {
     @Binding var pixelateAmount: Float
     @Binding var colorTint: SIMD4<Float>
     @Binding var colorTintIntensity: Float
+    @Binding var duotoneEnabled: Bool
+    @Binding var duotoneShadowColor: SIMD4<Float>
+    @Binding var duotoneHighlightColor: SIMD4<Float>
+    @Binding var duotoneShadowIntensity: Float
+    @Binding var duotoneHighlightIntensity: Float
     @State private var selectedAdjustment: String = "contrast"
     @EnvironmentObject private var colorSchemeManager: ColorSchemeManager
 
@@ -37,7 +42,8 @@ struct PhotoEditorAdjustments: View {
         Adjustment(id: "opacity", label: "Opacidade", icon: "circle.dashed"),
         Adjustment(id: "colorInvert", label: "Inverter", icon: "circle.righthalf.filled"),
         Adjustment(id: "pixelateAmount", label: "Pixelizar", icon: "rectangle.split.3x3"),
-        Adjustment(id: "colorTint", label: "Tint", icon: "paintpalette")
+        Adjustment(id: "colorTint", label: "Tint", icon: "paintpalette"),
+        Adjustment(id: "duotone", label: "Duotone", icon: "circles.hexagonpath.fill")
     ]
     
     
@@ -59,9 +65,9 @@ struct PhotoEditorAdjustments: View {
 
                             }
                             .padding(8)
-                            .boxBlankStyle(cornerRadius: .infinity, padding: 10)
+                            .boxBlankStyle(cornerRadius: 8, padding: 10)
                             .background(selectedAdjustment == adj.id  ? colorSchemeManager.secondaryColor : Color.clear)
-                            .clipShape(RoundedRectangle(cornerRadius: .infinity))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
                     }
                 }
@@ -107,6 +113,69 @@ struct PhotoEditorAdjustments: View {
                                 }
                             }
                         ))
+                        .padding(.horizontal)
+                    }                    } else if selectedAdjustment == "duotone" {
+                    VStack(spacing: 12) {
+                        Toggle("Ativar Duotone", isOn: $duotoneEnabled)
+                            .padding(.horizontal)
+                        
+                        DuotoneShadowIntensitySlider(value: $duotoneShadowIntensity)
+                            .padding(.horizontal)
+                        DuotoneHighlightIntensitySlider(value: $duotoneHighlightIntensity)
+                            .padding(.horizontal)
+                        HStack {
+                            VStack {
+                                Text("Sombras")
+                                    .font(.caption)
+                                    .foregroundColor(colorSchemeManager.secondaryColor)
+                                ColorPicker("", selection: Binding(
+                                    get: {
+                                        Color(red: Double(duotoneShadowColor.x), 
+                                             green: Double(duotoneShadowColor.y),
+                                             blue: Double(duotoneShadowColor.z),
+                                             opacity: Double(duotoneShadowColor.w))
+                                    },
+                                    set: { newColor in
+                                        if let components = newColor.cgColor?.components, components.count >= 3 {
+                                            duotoneShadowColor = SIMD4<Float>(
+                                                Float(components[0]),
+                                                Float(components[1]),
+                                                Float(components[2]), 
+                                                components.count > 3 ? Float(components[3]) : 1.0
+                                            )
+                                        }
+                                    }
+                                ))
+                                .labelsHidden()
+                            }
+                            
+                            Spacer()
+                            
+                            VStack {
+                                Text("Destaques")
+                                    .font(.caption)
+                                    .foregroundColor(colorSchemeManager.secondaryColor)
+                                ColorPicker("", selection: Binding(
+                                    get: {
+                                        Color(red: Double(duotoneHighlightColor.x),
+                                             green: Double(duotoneHighlightColor.y),
+                                             blue: Double(duotoneHighlightColor.z),
+                                             opacity: Double(duotoneHighlightColor.w))
+                                    },
+                                    set: { newColor in
+                                        if let components = newColor.cgColor?.components, components.count >= 3 {
+                                            duotoneHighlightColor = SIMD4<Float>(
+                                                Float(components[0]),
+                                                Float(components[1]), 
+                                                Float(components[2]),
+                                                components.count > 3 ? Float(components[3]) : 1.0
+                                            )
+                                        }
+                                    }
+                                ))
+                                .labelsHidden()
+                            }
+                        }
                         .padding(.horizontal)
                     }
                 }
@@ -252,7 +321,7 @@ private struct ColorTintSlider: View {
                 get: { Double(value) },
                 set: { newValue in value = Float(newValue) }
             ),
-            in: 1.0...3.0,
+            in: 1.0...6.0,
             step: 0.5,
             snap: .fraction,
             tick: .fraction
@@ -260,3 +329,44 @@ private struct ColorTintSlider: View {
     }
 }
 
+private struct DuotoneShadowIntensitySlider: View {
+    @Binding var value: Float
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Intensidade Sombras")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            SlidingRuler(
+                value: Binding(
+                    get: { Double(value) },
+                    set: { newValue in value = Float(newValue) }
+                ),
+                in: 0.0...2.0,
+                step: 0.5,
+                snap: .fraction,
+                tick: .fraction
+            )
+        }
+    }
+}
+
+private struct DuotoneHighlightIntensitySlider: View {
+    @Binding var value: Float
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Intensidade Destaques")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            SlidingRuler(
+                value: Binding(
+                    get: { Double(value) },
+                    set: { newValue in value = Float(newValue) }
+                ),
+                in: 0.0...2.0,
+                step: 0.5,
+                snap: .fraction,
+                tick: .fraction
+            )
+        }
+    }
+}

@@ -24,6 +24,12 @@ struct PhotoEditState: Equatable {
     // Color tint (RGBA, valores de 0 a 1)
     var colorTint: SIMD4<Float> = SIMD4<Float>(0,0,0,0) // padrão: sem cor
     var colorTintIntensity: Float = 1.0 // valor médio para que o slider fique no meio
+    // Duotone (usa duas cores para áreas de sombra e luz)
+    var duotoneEnabled: Bool = false
+    var duotoneShadowColor: SIMD4<Float> = SIMD4<Float>(0.0, 0.2, 1.0, 1.0) // Azul para sombras
+    var duotoneHighlightColor: SIMD4<Float> = SIMD4<Float>(1.0, 0.0, 0.0, 1.0) // Vermelho para destaques
+    var duotoneShadowIntensity: Float = 0.5 // Intensidade da cor de sombra
+    var duotoneHighlightIntensity: Float = 0.5 // Intensidade da cor de destaque
     // Adicione outros parâmetros depois
 }
 
@@ -148,18 +154,105 @@ class PhotoEditorViewModel: ObservableObject {
         } else {
             tintedImage = pixelatedImage
         }
+        
+        // Filtro de Duotone (quando ativado)
+        let duotoneImage: MTIImage
+        if state.duotoneEnabled {
+            // Passo 1: Converter para escala de cinza (luminância) com contraste aprimorado
+            // Para escala de cinza, usamos MTISaturationFilter com saturação 0
+            let grayscaleFilter = MTISaturationFilter()
+            grayscaleFilter.inputImage = tintedImage
+            grayscaleFilter.saturation = 0.0 // 0 = escala de cinza, 1 = cores normais
+            guard let basicGrayscaleImage = grayscaleFilter.outputImage else { return }
+            
+            // Opcional: aumentamos levemente o contraste para melhor separação entre sombras e destaques
+            let contrastFilter = MTIContrastFilter()
+            contrastFilter.inputImage = basicGrayscaleImage
+            contrastFilter.contrast = 1.2 // Leve aumento no contraste
+            guard let grayscaleImage = contrastFilter.outputImage else { return }
+            
+            // Passo 2: Criamos duas imagens de cores sólidas para sombras e destaques
+            let shadowColor = MTIColor(
+                red: Float(state.duotoneShadowColor.x),
+                green: Float(state.duotoneShadowColor.y), 
+                blue: Float(state.duotoneShadowColor.z),
+                alpha: 1.0
+            )
+            let shadowImage = MTIImage(color: shadowColor, sRGB: false, size: tintedImage.size)
+            
+            let highlightColor = MTIColor(
+                red: Float(state.duotoneHighlightColor.x),
+                green: Float(state.duotoneHighlightColor.y), 
+                blue: Float(state.duotoneHighlightColor.z),
+                alpha: 1.0
+            )
+            let highlightImage = MTIImage(color: highlightColor, sRGB: false, size: tintedImage.size)
+            
+            // Passo 3: Abordagem aprimorada de duotone usando Color Dodge para sombras
+            // Este método garante que as cores de sombra sejam mais visíveis
+            
+            // Primeiro criamos uma versão invertida da imagem em escala de cinza para sombras
+            let invertFilter = MTIColorInvertFilter()
+            invertFilter.inputImage = grayscaleImage
+            guard let invertedGray = invertFilter.outputImage else { return }
+            
+            // Aplicamos o blend de Color Burn entre a cor de sombra e a escala de cinza invertida
+            let shadowBlend = MTIBlendFilter(blendMode: .colorBurn)
+            shadowBlend.inputImage = invertedGray
+            shadowBlend.inputBackgroundImage = shadowImage
+            guard let shadowResult = shadowBlend.outputImage else { return }
+            
+            // Invertemos novamente para obter as sombras corretamente
+            let finalInvertFilter = MTIColorInvertFilter()
+            finalInvertFilter.inputImage = shadowResult
+            guard let shadowFinal = finalInvertFilter.outputImage else { return }
+            
+            // Para destaques, usamos Screen blend que funciona bem com áreas claras
+            let highlightBlend = MTIBlendFilter(blendMode: .screen)
+            highlightBlend.inputImage = grayscaleImage
+            highlightBlend.inputBackgroundImage = highlightImage
+            guard let highlightResult = highlightBlend.outputImage else { return }
+            
+            // Blend de sombras
+            let shadowBlendCustom = MTIBlendFilter(blendMode: .normal)
+            shadowBlendCustom.inputImage = shadowFinal
+            shadowBlendCustom.inputBackgroundImage = highlightResult
+            shadowBlendCustom.intensity = state.duotoneShadowIntensity
+            guard let shadowBlended = shadowBlendCustom.outputImage else { return }
+            // Blend de destaques
+            let highlightBlendCustom = MTIBlendFilter(blendMode: .normal)
+            highlightBlendCustom.inputImage = highlightResult
+            highlightBlendCustom.inputBackgroundImage = shadowFinal
+            highlightBlendCustom.intensity = state.duotoneHighlightIntensity
+            guard let highlightBlended = highlightBlendCustom.outputImage else { return }
+            // Combina os dois resultados (média)
+            let combineBlend = MTIBlendFilter(blendMode: .normal)
+            combineBlend.inputImage = shadowBlended
+            combineBlend.inputBackgroundImage = highlightBlended
+            combineBlend.intensity = 0.5
+            guard let balancedResult = combineBlend.outputImage else { return }
+            // Segundo blend para criar o efeito final com overlay
+            let finalBlend = MTIBlendFilter(blendMode: .overlay)
+            finalBlend.inputImage = balancedResult
+            finalBlend.inputBackgroundImage = highlightResult
+            guard let duotoneOutput = finalBlend.outputImage else { return }
+            // Removido: blend final com duotoneIntensity
+            duotoneImage = duotoneOutput
+        } else {
+            duotoneImage = tintedImage
+        }
 
         // Filtro de inversão de cores (quando colorInvert > 0)
         let finalImage: MTIImage
         if state.colorInvert > 0.0 {
             let invertFilter = MTIColorInvertFilter()
-            invertFilter.inputImage = tintedImage
+            invertFilter.inputImage = duotoneImage
             guard let invertedImage = invertFilter.outputImage else { return }
             // Se colorInvert < 1.0, fazemos um blend entre a imagem original e a invertida
             if state.colorInvert < 1.0 {
                 let blendFilter = MTIBlendFilter(blendMode: .normal)
                 blendFilter.inputImage = invertedImage
-                blendFilter.inputBackgroundImage = tintedImage
+                blendFilter.inputBackgroundImage = duotoneImage
                 blendFilter.intensity = state.colorInvert
                 guard let blendedImage = blendFilter.outputImage else { return }
                 finalImage = blendedImage
@@ -167,18 +260,32 @@ class PhotoEditorViewModel: ObservableObject {
                 finalImage = invertedImage
             }
         } else {
-            finalImage = tintedImage
+            finalImage = duotoneImage
         }
         
-        do {
-            let cgimg = try mtiContext.makeCGImage(from: finalImage)
-            let uiImage = UIImage(cgImage: cgimg)
-            DispatchQueue.main.async {
-                self.previewImage = uiImage
+        // Aplicar efeito de duotone se habilitado
+        if state.duotoneEnabled {
+            do {
+                let cgimg = try mtiContext.makeCGImage(from: finalImage)
+                let uiImage = UIImage(cgImage: cgimg)
+                DispatchQueue.main.async {
+                    self.previewImage = uiImage
+                }
+                os_log("[PhotoEditorViewModel] Duotone image generated successfully.")
+            } catch {
+                os_log("[PhotoEditorViewModel] Failed to generate duotone image: %{public}@", String(describing: error))
             }
-            os_log("[PhotoEditorViewModel] Preview image generated successfully.")
-        } catch {
-            os_log("[PhotoEditorViewModel] Failed to generate preview: %{public}@", String(describing: error))
+        } else {
+            do {
+                let cgimg = try mtiContext.makeCGImage(from: finalImage)
+                let uiImage = UIImage(cgImage: cgimg)
+                DispatchQueue.main.async {
+                    self.previewImage = uiImage
+                }
+                os_log("[PhotoEditorViewModel] Preview image generated successfully.")
+            } catch {
+                os_log("[PhotoEditorViewModel] Failed to generate preview: %{public}@", String(describing: error))
+            }
         }
     }
 }
