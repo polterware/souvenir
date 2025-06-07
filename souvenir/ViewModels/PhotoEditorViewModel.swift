@@ -163,13 +163,7 @@ class PhotoEditorViewModel: ObservableObject {
             let grayscaleFilter = MTISaturationFilter()
             grayscaleFilter.inputImage = tintedImage
             grayscaleFilter.saturation = 0.0 // 0 = escala de cinza, 1 = cores normais
-            guard let basicGrayscaleImage = grayscaleFilter.outputImage else { return }
-            
-            // Opcional: aumentamos levemente o contraste para melhor separação entre sombras e destaques
-            let contrastFilter = MTIContrastFilter()
-            contrastFilter.inputImage = basicGrayscaleImage
-            contrastFilter.contrast = 1.2 // Leve aumento no contraste
-            guard let grayscaleImage = contrastFilter.outputImage else { return }
+            guard let grayscaleImage = grayscaleFilter.outputImage else { return }
             
             // Passo 2: Criamos duas imagens de cores sólidas para sombras e destaques
             let shadowColor = MTIColor(

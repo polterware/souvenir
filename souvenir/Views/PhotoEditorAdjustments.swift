@@ -321,7 +321,7 @@ private struct ColorTintSlider: View {
                 get: { Double(value) },
                 set: { newValue in value = Float(newValue) }
             ),
-            in: 1.0...6.0,
+            in: 0.0...6.0,
             step: 0.5,
             snap: .fraction,
             tick: .fraction
