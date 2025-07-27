@@ -54,20 +54,55 @@ struct PhotoEditorAdjustments: View {
                     .font(.caption2)
                     .foregroundColor(colorSchemeManager.secondaryColor)
             }
+            
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(adjustments) { adj in
-                        Button(action: { selectedAdjustment = adj.id }) {
-                            VStack {
-                                Image(systemName: adj.icon)
-                                    .frame(width: 16, height: 16)
-                                    .foregroundColor(selectedAdjustment == adj.id  ? colorSchemeManager.primaryColor : colorSchemeManager.secondaryColor)
-
+                        // Define se o botão está "ativo" (valor diferente do padrão)
+                        let isActive: Bool = {
+                            switch adj.id {
+                            case "contrast": return contrast != 1.0
+                            case "brightness": return brightness != 0.0
+                            case "exposure": return exposure != 0.0
+                            case "saturation": return saturation != 1.0
+                            case "vibrance": return vibrance != 0.0
+                            case "opacity": return opacity != 1.0
+                            case "colorInvert": return colorInvert == 1.0
+                            case "pixelateAmount": return pixelateAmount != 1.0
+                            case "colorTint": return !(colorTint.x == 0.0 && colorTint.y == 0.0 && colorTint.z == 0.0 && colorTint.w == 0.0)
+                            case "duotone": return duotoneEnabled
+                            default: return false
                             }
-                            .padding(8)
-                            .boxBlankStyle(cornerRadius: 8, padding: 10)
-                            .background(selectedAdjustment == adj.id  ? colorSchemeManager.secondaryColor : Color.clear)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }()
+
+                        if adj.id == "colorInvert" {
+                            Button(action: {
+                                // Toggle colorInvert
+                                colorInvert = colorInvert == 1.0 ? 0.0 : 1.0
+                                selectedAdjustment = adj.id
+                            }) {
+                                VStack {
+                                    Image(systemName: adj.icon)
+                                        .frame(width: 16, height: 16)
+                                        .foregroundColor(isActive ? colorSchemeManager.primaryColor : colorSchemeManager.secondaryColor)
+                                }
+                                .padding(8)
+                                .boxBlankStyle(cornerRadius: 8, padding: 10)
+                                .background(isActive ? colorSchemeManager.secondaryColor : Color.clear)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                        } else {
+                            Button(action: { selectedAdjustment = adj.id }) {
+                                VStack {
+                                    Image(systemName: adj.icon)
+                                        .frame(width: 16, height: 16)
+                                        .foregroundColor(isActive ? colorSchemeManager.primaryColor : colorSchemeManager.secondaryColor)
+                                }
+                                .padding(8)
+                                .boxBlankStyle(cornerRadius: 8, padding: 10)
+                                .background(isActive ? colorSchemeManager.secondaryColor : Color.clear)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
                         }
                     }
                 }
@@ -94,15 +129,19 @@ struct PhotoEditorAdjustments: View {
                     OpacitySlider(value: $opacity)
                         .padding(.horizontal)
                 } else if selectedAdjustment == "colorInvert" {
-                    ColorInvertSlider(value: $colorInvert)
-                        .padding(.horizontal)
+                    // Não mostra slider, só mostra se está ativado
+                    HStack {
+                        Image(systemName: "circle.righthalf.filled")
+                            .foregroundColor(colorInvert == 1.0 ? colorSchemeManager.primaryColor : colorSchemeManager.secondaryColor)
+                        Text(colorInvert == 1.0 ? "Invertido" : "Normal")
+                            .foregroundColor(colorSchemeManager.secondaryColor)
+                    }
+                    .padding(.horizontal)
                 } else if selectedAdjustment == "pixelateAmount" {
                     PixelateSlider(value: $pixelateAmount)
                         .padding(.horizontal)
                 } else if selectedAdjustment == "colorTint" {
-                    VStack(spacing: 8) {
-                        ColorTintSlider(value: $colorTintIntensity)
-                            .padding(.horizontal)
+                    HStack(spacing: 16) {
                         ColorPicker("Cor do Tint", selection: Binding(
                             get: {
                                 Color(red: Double(colorTint.x), green: Double(colorTint.y), blue: Double(colorTint.z), opacity: Double(colorTint.w))
@@ -113,12 +152,26 @@ struct PhotoEditorAdjustments: View {
                                 }
                             }
                         ))
-                        .padding(.horizontal)
-                    }                    } else if selectedAdjustment == "duotone" {
+                        .frame(width: 48, height: 48)
+                        .scaleEffect(1.5)
+
+                        Button(action: {
+                            // Remove cor: define como transparente
+                            colorTint = SIMD4<Float>(0.0, 0.0, 0.0, 0.0)
+                        }) {
+                            Text("Remover cor")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                                .padding(8)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(8)
+                        }
+                    }
+                    .padding(.horizontal)
+                } else if selectedAdjustment == "duotone" {
                     VStack(spacing: 12) {
                         Toggle("Ativar Duotone", isOn: $duotoneEnabled)
                             .padding(.horizontal)
-                        
                         DuotoneShadowIntensitySlider(value: $duotoneShadowIntensity)
                             .padding(.horizontal)
                         DuotoneHighlightIntensitySlider(value: $duotoneHighlightIntensity)
@@ -148,9 +201,7 @@ struct PhotoEditorAdjustments: View {
                                 ))
                                 .labelsHidden()
                             }
-                            
                             Spacer()
-                            
                             VStack {
                                 Text("Destaques")
                                     .font(.caption)
@@ -180,7 +231,6 @@ struct PhotoEditorAdjustments: View {
                     }
                 }
             }
-           
         }
     }
 }

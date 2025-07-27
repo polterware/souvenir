@@ -31,9 +31,6 @@ struct PhotoEditorView: View {
                         lastZoomScale: $lastZoomScale
                     )
 
-                    // ÁREA DE OPÇÕES DE CADA CATEGORIA e o toolbar no fundo com animação e altura fixa
-                    Spacer() // Empurra tudo para baixo
-
                     VStack{
                         // Menu de conteúdo animado
                         ZStack {
@@ -69,7 +66,6 @@ struct PhotoEditorView: View {
                             }
                         }
                         .animation(.easeOut(duration: 0.28), value: selectedCategory)
-                        .frame(maxHeight: .infinity)
                         
                         // Toolbar sempre visível
                         PhotoEditorToolbar(
@@ -77,12 +73,9 @@ struct PhotoEditorView: View {
                             bottomSize: $bottomSize
                         )
                         .padding(.bottom, 20)
-                        
-                        Spacer()
                     }
                     .padding(.vertical)
                     .background(colorSchemeManager.primaryColor)
-                    .frame(minHeight: geometry.size.height * 0.25)
                     .padding(.bottom, geometry.safeAreaInsets.bottom)
                 }
                 
