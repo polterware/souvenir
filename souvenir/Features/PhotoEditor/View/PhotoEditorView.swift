@@ -3,6 +3,7 @@ import UIKit
 
 
 struct PhotoEditorView: View {
+    @State private var isSaving: Bool = false
     let namespace: Namespace.ID
     let matchedID: String
     var onFinishEditing: ((UIImage?, PhotoEditState?, Bool) -> Void)? // (finalImage, ajustes, salvou?)
@@ -83,13 +84,29 @@ struct PhotoEditorView: View {
                     .padding(.bottom, geometry.safeAreaInsets.bottom)
                 }
             }
+            if isSaving {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                ProgressView("Salvando...")
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .foregroundColor(.white)
+                    .padding(40)
+                    .background(Color.black.opacity(0.7))
+                    .cornerRadius(16)
+            }
         }
         // Modal de salvar/descartar ao tentar voltar
         .confirmationDialog("Salvar alterações?", isPresented: $showSaveDiscardModal, titleVisibility: .visible) {
             Button("Salvar", role: .none) {
-                let finalImage = viewModel.generateFinalImage()
-                onFinishEditing?(finalImage, viewModel.editState, true)
-                dismiss()
+                isSaving = true
+                DispatchQueue.global(qos: .userInitiated).async {
+                    let finalImage = viewModel.generateFinalImage()
+                    DispatchQueue.main.async {
+                        onFinishEditing?(finalImage, viewModel.editState, true)
+                        isSaving = false
+                        dismiss()
+                    }
+                }
             }
             Button("Descartar", role: .destructive) {
                 onFinishEditing?(nil, nil, false)
