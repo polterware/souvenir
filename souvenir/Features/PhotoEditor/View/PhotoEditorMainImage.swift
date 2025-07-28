@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct PhotoEditorMainImage: View {
-    // Removido: estados de zoom/pan manual
     @Binding var image: UIImage?
     @Binding var filteredImage: UIImage?
     let matchedID: String
@@ -21,18 +20,22 @@ struct PhotoEditorMainImage: View {
             if let filtered = filteredImage {
                 Image(uiImage: filtered)
                     .resizable()
+                    .renderingMode(.original)
                     .interpolation(.high)
+                    .antialiased(true)
                     .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
-                    .scaledToFit()
+                    .aspectRatio(contentMode: .fit)
                     .cornerRadius(20)
                     .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
-                    .animation(nil, value: filtered)
+                    .animation(.none, value: filtered)
             } else if let original = image {
                 Image(uiImage: original)
                     .resizable()
+                    .renderingMode(.original)
                     .interpolation(.high)
+                    .antialiased(true)
                     .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
-                    .scaledToFit()
+                    .aspectRatio(contentMode: .fit)
                     .cornerRadius(20)
                     .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
             } else {

@@ -1,9 +1,16 @@
 import SwiftUI
 import PhotosUI
+import UniformTypeIdentifiers
 import FluidGradient
+import ImageIO
 
 struct ContentView: View {
-    @State private var photos: [UIImage] = []
+    struct StoredPhoto {
+        let url: URL
+        let data: Data
+        let image: UIImage
+    }
+    @State private var photos: [StoredPhoto] = []
     @State private var showCamera = false
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var selectedPhotoForEditor: UIImage? = nil
@@ -15,11 +22,11 @@ struct ContentView: View {
         NavigationStack {
             ZStack {
                 PhotosScrollView(
-                    photos: $photos,
+                    photos: Binding(get: { photos.map { $0.image } }, set: { _ in }),
                     selectedItems: $selectedItems,
                     ns: ns,
                     onPhotoSelected: { index in
-                        navigateToPhotoEditor(photo: photos[index])
+                        navigateToPhotoEditor(photo: photos[index].image)
                     },
                     onPhotosChanged: {
                         savePhotos()
@@ -39,10 +46,13 @@ struct ContentView: View {
                 Task {
                     for item in newItems {
                         if let data = try? await item.loadTransferable(type: Data.self) {
-                            // Usa o scale da tela para máxima qualidade
-                            let uiImage = UIImage(data: data, scale: UIScreen.main.scale)?.fixOrientation().withAlpha()
-                            if let img = uiImage {
-                                photos.append(img)
+                            let ext = detectImageExtension(data: data)
+                            let filename = "photo_\(UUID().uuidString).\(ext)"
+                            let url = getPhotoStorageDir().appendingPathComponent(filename)
+                            try? FileManager.default.createDirectory(at: getPhotoStorageDir(), withIntermediateDirectories: true)
+                            try? data.write(to: url)
+                            if let img = loadUIImageFullQuality(from: data) {
+                                photos.append(StoredPhoto(url: url, data: data, image: img))
                             }
                         }
                     }
@@ -55,8 +65,16 @@ struct ContentView: View {
             }
             .navigationDestination(isPresented: $showCamera) {
                 PhotoCaptureView(onPhotoCaptured: { photo in
-                    if let safePhoto = photo.withAlpha() {
-                        photos.append(safePhoto)
+                    // Corrige orientação antes de salvar
+                    let orientationFixedPhoto = photo.fixOrientation()
+                    
+                    if let data = orientationFixedPhoto.pngData() ?? orientationFixedPhoto.jpegData(compressionQuality: 1.0) {
+                        let ext = detectImageExtension(data: data)
+                        let filename = "photo_\(UUID().uuidString).\(ext)"
+                        let url = getPhotoStorageDir().appendingPathComponent(filename)
+                        try? FileManager.default.createDirectory(at: getPhotoStorageDir(), withIntermediateDirectories: true)
+                        try? data.write(to: url)
+                        photos.append(StoredPhoto(url: url, data: data, image: orientationFixedPhoto))
                         savePhotos()
                     }
                 })
@@ -102,20 +120,56 @@ struct ContentView: View {
     }
 
     func savePhotos() {
-        let data = photos.compactMap { $0.pngData() }
-        UserDefaults.standard.set(data, forKey: "savedPhotos")
+        // Salva apenas os paths das imagens, não os dados
+        let urls = photos.map { $0.url.path }
+        UserDefaults.standard.set(urls, forKey: "savedPhotoPaths")
     }
 
     func loadPhotos() {
-        if let data = UserDefaults.standard.array(forKey: "savedPhotos") as? [Data] {
-            photos = data.compactMap { 
-                if let loadedImage = UIImage(data: $0, scale: UIScreen.main.scale) {
-                    return loadedImage.fixOrientation().withAlpha()
+        var loaded: [StoredPhoto] = []
+        if let paths = UserDefaults.standard.array(forKey: "savedPhotoPaths") as? [String] {
+            for path in paths {
+                let url = URL(fileURLWithPath: path)
+                if let data = try? Data(contentsOf: url), let img = loadUIImageFullQuality(from: data) {
+                    loaded.append(StoredPhoto(url: url, data: data, image: img))
                 }
-                return nil
             }
         }
+        photos = loaded
     }
+}
+
+// MARK: - Carregamento de imagem com máxima qualidade
+func loadUIImageFullQuality(from data: Data) -> UIImage? {
+    guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
+        return UIImage(data: data)
+    }
+    
+    // Opções para carregamento com máxima qualidade
+    let options: [CFString: Any] = [
+        kCGImageSourceShouldAllowFloat: true,
+        kCGImageSourceCreateThumbnailFromImageAlways: false,
+        kCGImageSourceCreateThumbnailWithTransform: true
+    ]
+    
+    guard let cgImage = CGImageSourceCreateImageAtIndex(source, 0, options as CFDictionary) else {
+        return UIImage(data: data)
+    }
+    
+    // Preserva a escala original para máxima nitidez
+    return UIImage(cgImage: cgImage, scale: 1.0, orientation: .up)
+}
+
+// MARK: - Helpers para formato original
+func detectImageExtension(data: Data) -> String {
+    if data.starts(with: [0xFF, 0xD8, 0xFF]) { return "jpg" }
+    if data.starts(with: [0x89, 0x50, 0x4E, 0x47]) { return "png" }
+    if data.starts(with: [0x00, 0x00, 0x00, 0x18]) || data.starts(with: [0x00, 0x00, 0x00, 0x1C]) { return "heic" }
+    return "img"
+}
+
+func getPhotoStorageDir() -> URL {
+    FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("PhotoStorage")
 }
 
 #Preview {

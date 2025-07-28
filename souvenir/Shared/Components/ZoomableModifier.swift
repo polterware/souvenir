@@ -30,6 +30,8 @@ struct ZoomableModifier: ViewModifier {
                 }
             }
             .gesture(doubleTapGesture)
+            // Configurações para melhor qualidade durante transformações
+            .drawingGroup(opaque: false, colorMode: .nonLinear)
     }
 
     @available(iOS, introduced: 16.0, deprecated: 17.0)
@@ -54,7 +56,8 @@ struct ZoomableModifier: ViewModifier {
                     anchor: value.startAnchor.scaledBy(contentSize)
                 )
 
-                withAnimation(.interactiveSpring) {
+                // Animação mais suave para preservar qualidade
+                withAnimation(.interactiveSpring(response: 0.3, dampingFraction: 0.8)) {
                     transform = lastTransform.concatenating(newTransform)
                 }
             }
@@ -73,7 +76,7 @@ struct ZoomableModifier: ViewModifier {
                         .identity
                     }
 
-                withAnimation(.linear(duration: 0.15)) {
+                withAnimation(.easeOut(duration: 0.3)) {
                     transform = newTransform
                     lastTransform = newTransform
                 }
@@ -83,7 +86,7 @@ struct ZoomableModifier: ViewModifier {
     private var dragGesture: some Gesture {
         DragGesture()
             .onChanged { value in
-                withAnimation(.interactiveSpring) {
+                withAnimation(.interactiveSpring(response: 0.3, dampingFraction: 0.8)) {
                     transform = lastTransform.translatedBy(
                         x: value.translation.width / transform.scaleX,
                         y: value.translation.height / transform.scaleY
@@ -98,7 +101,7 @@ struct ZoomableModifier: ViewModifier {
     private func onEndGesture() {
         let newTransform = limitTransform(transform)
 
-        withAnimation(.snappy(duration: 0.1)) {
+        withAnimation(.easeOut(duration: 0.15)) {
             transform = newTransform
             lastTransform = newTransform
         }
@@ -108,9 +111,7 @@ struct ZoomableModifier: ViewModifier {
         let scaleX = transform.scaleX
         let scaleY = transform.scaleY
 
-        if scaleX < minZoomScale
-            || scaleY < minZoomScale
-        {
+        if scaleX < minZoomScale || scaleY < minZoomScale {
             return .identity
         }
 
@@ -178,6 +179,8 @@ private extension View {
             anchor: .zero
         )
         .offset(x: transform.tx, y: transform.ty)
+        .allowsHitTesting(true)
+        .compositingGroup()
     }
 }
 
