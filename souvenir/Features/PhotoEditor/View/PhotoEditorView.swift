@@ -103,6 +103,7 @@ struct PhotoEditorView: View {
                     let finalImage = viewModel.generateFinalImage()
                     DispatchQueue.main.async {
                         onFinishEditing?(finalImage, viewModel.editState, true)
+                        viewModel.editState = initialEditState
                         isSaving = false
                         dismiss()
                     }
@@ -134,6 +135,17 @@ struct PhotoEditorView: View {
                     }
                 }) {
                     Label("Voltar", systemImage: "chevron.left")
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    // Restaura a imagem original e reseta todos os ajustes
+                    if let original = viewModel.originalImage {
+                        viewModel.previewBase = original.resizeToFit(maxSize: 1024)
+                        viewModel.editState = PhotoEditState() // Reset total
+                    }
+                }) {
+                    Label("Reverter", systemImage: "arrow.uturn.backward")
                 }
             }
         }
