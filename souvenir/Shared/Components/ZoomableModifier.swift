@@ -30,8 +30,7 @@ struct ZoomableModifier: ViewModifier {
                 }
             }
             .gesture(doubleTapGesture)
-            // Configurações para melhor qualidade durante transformações
-            .drawingGroup(opaque: false, colorMode: .nonLinear)
+
     }
 
     @available(iOS, introduced: 16.0, deprecated: 17.0)
@@ -180,7 +179,6 @@ private extension View {
         )
         .offset(x: transform.tx, y: transform.ty)
         .allowsHitTesting(true)
-        .compositingGroup()
     }
 }
 

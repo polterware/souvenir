@@ -42,7 +42,7 @@ struct PhotoEditorMainImage: View {
                     .foregroundColor(.gray)
             }
         }
-        .cornerRadius(20)
+        .cornerRadius(12)
         .padding(.horizontal)
         .frame(maxHeight: .infinity)
     }
