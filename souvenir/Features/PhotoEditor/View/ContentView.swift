@@ -218,6 +218,7 @@ struct ContentView: View {
                         selectedPhotoForEditor = nil
                         selectedPhotoIndex = nil
                     }
+                    .navigationBarBackButtonHidden(true)
                 }
             }
         }

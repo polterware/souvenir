@@ -83,21 +83,21 @@ struct PhotoEditorView: View {
                     .padding(.bottom, geometry.safeAreaInsets.bottom)
                 }
             }
-            // Modal de salvar/descartar ao tentar voltar
-            .confirmationDialog("Salvar alterações?", isPresented: $showSaveDiscardModal, titleVisibility: .visible) {
-                Button("Salvar", role: .none) {
-                    let finalImage = viewModel.generateFinalImage()
-                    onFinishEditing?(finalImage, viewModel.editState, true)
-                    dismiss()
-                }
-                Button("Descartar", role: .destructive) {
-                    onFinishEditing?(nil, nil, false)
-                    dismiss()
-                }
-                Button("Cancelar", role: .cancel) {}
-            } message: {
-                Text("Você deseja salvar as alterações feitas nesta edição?")
+        }
+        // Modal de salvar/descartar ao tentar voltar
+        .confirmationDialog("Salvar alterações?", isPresented: $showSaveDiscardModal, titleVisibility: .visible) {
+            Button("Salvar", role: .none) {
+                let finalImage = viewModel.generateFinalImage()
+                onFinishEditing?(finalImage, viewModel.editState, true)
+                dismiss()
             }
+            Button("Descartar", role: .destructive) {
+                onFinishEditing?(nil, nil, false)
+                dismiss()
+            }
+            Button("Cancelar", role: .cancel) {}
+        } message: {
+            Text("Você deseja salvar as alterações feitas nesta edição?")
         }
         .ignoresSafeArea(edges: .bottom)
         .onAppear {
