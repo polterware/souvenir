@@ -69,22 +69,31 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                PhotosScrollView(
-                    photos: $photos,
-                    selectedItems: $selectedItems,
-                    ns: ns,
-                    onPhotoSelected: { index in
-                        selectedPhotoIndex = index
-                        navigateToPhotoEditor(photo: photos[index].image)
-                    },
-                    onPhotosChanged: {
-                        savePhotos()
-                    },
-                    onSelectionChanged: { active in
-                        isSelectionActive = active
-                    },
-                    getImage: { $0.image }
-                )
+                VStack(spacing: 0) {
+                    Image("logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 48)
+                        .padding(.top, 16)
+                        .padding(.bottom, 6)
+                        .padding(.horizontal, 20)
+                    PhotosScrollView(
+                        photos: $photos,
+                        selectedItems: $selectedItems,
+                        ns: ns,
+                        onPhotoSelected: { index in
+                            selectedPhotoIndex = index
+                            navigateToPhotoEditor(photo: photos[index].image)
+                        },
+                        onPhotosChanged: {
+                            savePhotos()
+                        },
+                        onSelectionChanged: { active in
+                            isSelectionActive = active
+                        },
+                        getImage: { $0.image }
+                    )
+                }
 
                 if !isSelectionActive {
                     CameraButtonView(ns: ns) {
