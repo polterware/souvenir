@@ -77,6 +77,8 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		2C0369E42E36FA11009990C4 /* Features */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Features; sourceTree = "<group>"; };
+		2C0369FA2E36FA1C009990C4 /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
 		2CD17E262DEA0B4D00D398A2 /* Preview Content */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (2CD17E782DEA8B9E00D398A2 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = "Preview Content"; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -157,6 +159,8 @@
 				2CB568B22C7CB9B70027924C /* Persistence.swift */,
 				2CB568B42C7CB9B70027924C /* souvenir.xcdatamodeld */,
 				2CB568AF2C7CB9B70027924C /* Preview Content */,
+				2C0369E42E36FA11009990C4 /* Features */,
+				2C0369FA2E36FA1C009990C4 /* Shared */,
 			);
 			path = souvenir;
 			sourceTree = "<group>";
@@ -213,6 +217,8 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				2C0369E42E36FA11009990C4 /* Features */,
+				2C0369FA2E36FA1C009990C4 /* Shared */,
 				2CD17E262DEA0B4D00D398A2 /* Preview Content */,
 			);
 			name = souvenir;
