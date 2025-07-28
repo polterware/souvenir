@@ -16,36 +16,39 @@ struct PhotoEditorMainImage: View {
     @Binding var lastZoomScale: CGFloat
 
     var body: some View {
-        ZStack {
-            if let filtered = filteredImage {
-                Image(uiImage: filtered)
-                    .resizable()
-                    .renderingMode(.original)
-                    .interpolation(.high)
-                    .antialiased(true)
-                    .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
-                    .aspectRatio(contentMode: .fit)
-                    .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
-                    .animation(.none, value: filtered)
-                    .cornerRadius(12)
-            } else if let original = image {
-                Image(uiImage: original)
-                    .resizable()
-                    .renderingMode(.original)
-                    .interpolation(.high)
-                    .antialiased(true)
-                    .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
-                    .aspectRatio(contentMode: .fit)
-                    .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
-                    .cornerRadius(12)
-            } else {
-                Text("Carregue ou selecione uma imagem para editar")
-                    .font(.headline)
-                    .foregroundColor(.gray)
+        GeometryReader { proxy in
+            ZStack {
+                if let filtered = filteredImage {
+                    Color.clear // para ocupar todo o espaço
+                    Image(uiImage: filtered)
+                        .resizable()
+                        .renderingMode(.original)
+                        .interpolation(.high)
+                        .antialiased(true)
+                        .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
+                        .animation(.none, value: filtered)
+                } else if let original = image {
+                    Color.clear
+                    Image(uiImage: original)
+                        .resizable()
+                        .renderingMode(.original)
+                        .interpolation(.high)
+                        .antialiased(true)
+                        .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: proxy.size.width, height: proxy.size.height)
+                        .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
+                } else {
+                    Text("Carregue ou selecione uma imagem para editar")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                }
             }
+            .frame(width: proxy.size.width, height: proxy.size.height)
         }
-        .cornerRadius(12)
-        .padding(.horizontal)
         .frame(maxHeight: .infinity)
     }
 }
