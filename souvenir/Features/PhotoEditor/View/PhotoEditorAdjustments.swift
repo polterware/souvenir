@@ -122,7 +122,6 @@ struct RulerSlider: View {
 //
 
 import SwiftUI
-import SlidingRuler
 
 struct Adjustment: Identifiable, Hashable {
     let id: String // unique key
@@ -554,3 +553,4 @@ private struct DuotoneHighlightIntensitySlider: View {
         }
     }
 }
+
