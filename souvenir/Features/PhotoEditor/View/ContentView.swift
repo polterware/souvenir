@@ -161,25 +161,47 @@ func loadUIImageFullQuality(from data: Data) -> UIImage? {
         return UIImage(data: data)
     }
 
-    // Opções para carregamento com máxima qualidade
+    // Opções para carregar a imagem já com a orientação EXIF aplicada
     let options: [CFString: Any] = [
         kCGImageSourceShouldAllowFloat: true,
         kCGImageSourceCreateThumbnailFromImageAlways: false,
-        kCGImageSourceCreateThumbnailWithTransform: true
+        kCGImageSourceCreateThumbnailWithTransform: true,
+        kCGImageSourceShouldCacheImmediately: true
     ]
+
+    // Pega a orientação EXIF
+    let propertiesOptions = [kCGImageSourceShouldCache: false] as CFDictionary
+    var orientation: UIImage.Orientation = .up
+    if let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, propertiesOptions) as? [CFString: Any],
+       let exifOrientation = properties[kCGImagePropertyOrientation] as? UInt32 {
+        orientation = UIImage.Orientation(exifOrientation: exifOrientation)
+    }
 
     guard let cgImage = CGImageSourceCreateImageAtIndex(source, 0, options as CFDictionary) else {
         return UIImage(data: data)
     }
 
-    // Usa a escala do CGImage se possível, senão da tela
-    let scale: CGFloat
-    if let imageSourceScale = (cgImage.width > 0 && cgImage.height > 0) ? UIScreen.main.scale : nil {
-        scale = imageSourceScale
-    } else {
-        scale = UIScreen.main.scale
+    let scale: CGFloat = UIScreen.main.scale
+    let image = UIImage(cgImage: cgImage, scale: scale, orientation: orientation)
+    // Garante que a orientação será .up para todo o app
+    return image.fixOrientation()
+}
+
+// Extensão para converter EXIF para UIImage.Orientation
+extension UIImage.Orientation {
+    init(exifOrientation: UInt32) {
+        switch exifOrientation {
+        case 1: self = .up
+        case 2: self = .upMirrored
+        case 3: self = .down
+        case 4: self = .downMirrored
+        case 5: self = .leftMirrored
+        case 6: self = .right
+        case 7: self = .rightMirrored
+        case 8: self = .left
+        default: self = .up
+        }
     }
-    return UIImage(cgImage: cgImage, scale: scale, orientation: .up)
 }
 
 // MARK: - Helpers para formato original
