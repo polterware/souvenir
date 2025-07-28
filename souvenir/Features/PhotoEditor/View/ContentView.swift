@@ -22,7 +22,7 @@ struct ContentView: View {
         NavigationStack {
             ZStack {
                 PhotosScrollView(
-                    photos: Binding(get: { photos.map { $0.image } }, set: { _ in }),
+                    photos: $photos,
                     selectedItems: $selectedItems,
                     ns: ns,
                     onPhotoSelected: { index in
@@ -33,7 +33,8 @@ struct ContentView: View {
                     },
                     onSelectionChanged: { active in
                         isSelectionActive = active
-                    }
+                    },
+                    getImage: { $0.image }
                 )
 
                 if !isSelectionActive {
@@ -54,7 +55,7 @@ struct ContentView: View {
                             let url = storageDir.appendingPathComponent(filename)
                             do {
                                 try data.write(to: url)
-                                if let img = loadUIImageFullQuality(from: data) {
+                                if let img = loadUIImageFullQuality(from: data)?.fixOrientation() {
                                     importedPhotos.append(StoredPhoto(url: url, data: data, image: img))
                                 }
                             } catch {

@@ -1,8 +1,9 @@
+
 import SwiftUI
 import PhotosUI
 
-struct PhotosScrollView: View {
-    @Binding var photos: [UIImage]
+struct PhotosScrollView<PhotoType>: View {
+    @Binding var photos: [PhotoType]
     @Binding var selectedItems: [PhotosPickerItem]
     @State private var selectedPhotoIndices: Set<Int> = []
     @State private var showShareSheet: Bool = false
@@ -11,10 +12,11 @@ struct PhotosScrollView: View {
     var onPhotoSelected: (Int) -> Void
     var onPhotosChanged: () -> Void
     var onSelectionChanged: (Bool) -> Void
+    var getImage: (PhotoType) -> UIImage
 
     var selectedPhotos: [UIImage] {
         selectedPhotoIndices.compactMap { index in
-            if index < photos.count { return photos[index] }
+            if index < photos.count { return getImage(photos[index]) }
             else { return nil }
         }
     }
@@ -37,9 +39,9 @@ struct PhotosScrollView: View {
                             .frame(width: 100, height: 100)
                     }
 
-                    ForEach(photos.indices, id: \.self) { index in
+                    ForEach(photos.indices, id: \ .self) { index in
                         PhotoGridItem(
-                            photo: photos[index],
+                            photo: getImage(photos[index]),
                             index: index,
                             ns: ns,
                             isSelected: selectedPhotoIndices.contains(index),
@@ -81,8 +83,12 @@ struct PhotosScrollView: View {
                             .cornerRadius(8)
                     }
                     Button(action: {
-                        for index in selectedPhotoIndices.sorted(by: >) {
-                            photos.remove(at: index)
+                        let indicesToRemove = selectedPhotoIndices.sorted(by: >)
+                        print("Removendo índices: \(indicesToRemove)")
+                        for index in indicesToRemove {
+                            if index < photos.count {
+                                photos.remove(at: index)
+                            }
                         }
                         selectedPhotoIndices.removeAll()
                         onPhotosChanged()
