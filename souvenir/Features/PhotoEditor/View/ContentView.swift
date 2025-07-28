@@ -4,6 +4,20 @@ import UniformTypeIdentifiers
 import FluidGradient
 import ImageIO
 
+// Exporta UIImage como HEIC (qualidade máxima), se suportado
+import MobileCoreServices
+import AVFoundation
+
+func exportUIImageAsHEIC(_ image: UIImage) -> Data? {
+    guard let cgImage = image.cgImage else { return nil }
+    let data = NSMutableData()
+    guard let dest = CGImageDestinationCreateWithData(data, AVFileType.heic as CFString, 1, nil) else { return nil }
+    let options: [CFString: Any] = [kCGImageDestinationLossyCompressionQuality: 1.0]
+    CGImageDestinationAddImage(dest, cgImage, options as CFDictionary)
+    guard CGImageDestinationFinalize(dest) else { return nil }
+    return data as Data
+}
+
 struct ContentView: View {
     struct StoredPhoto {
         let url: URL
@@ -50,16 +64,45 @@ struct ContentView: View {
                     try? FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
                     for item in newItems {
                         if let data = try? await item.loadTransferable(type: Data.self) {
-                            let ext = detectImageExtension(data: data)
-                            let filename = "photo_\(UUID().uuidString).\(ext)"
-                            let url = storageDir.appendingPathComponent(filename)
-                            do {
-                                try data.write(to: url)
-                                if let img = loadUIImageFullQuality(from: data)?.fixOrientation() {
-                                    importedPhotos.append(StoredPhoto(url: url, data: data, image: img))
+                            if let img = loadUIImageFullQuality(from: data) {
+                                let ext = detectImageExtension(data: data)
+                                let filename: String
+                                let url: URL
+                                var outData: Data? = nil
+                                var outExt: String = ext
+                                switch ext {
+                                case "heic":
+                                    if let heicData = exportUIImageAsHEIC(img) {
+                                        outData = heicData
+                                        outExt = "heic"
+                                    }
+                                case "jpg":
+                                    if let jpgData = img.jpegData(compressionQuality: 1.0) {
+                                        outData = jpgData
+                                        outExt = "jpg"
+                                    }
+                                case "png":
+                                    if let pngData = img.pngData() {
+                                        outData = pngData
+                                        outExt = "png"
+                                    }
+                                default:
+                                    // fallback para PNG
+                                    if let pngData = img.pngData() {
+                                        outData = pngData
+                                        outExt = "png"
+                                    }
                                 }
-                            } catch {
-                                print("[Import] Falha ao salvar imagem em: \(url.path)")
+                                filename = "photo_\(UUID().uuidString).\(outExt)"
+                                url = storageDir.appendingPathComponent(filename)
+                                do {
+                                    if let outData {
+                                        try outData.write(to: url)
+                                        importedPhotos.append(StoredPhoto(url: url, data: outData, image: img))
+                                    }
+                                } catch {
+                                    print("[Import] Falha ao salvar imagem em: \(url.path)")
+                                }
                             }
                         }
                     }
@@ -75,11 +118,21 @@ struct ContentView: View {
             }
             .navigationDestination(isPresented: $showCamera) {
                 PhotoCaptureView(onPhotoCaptured: { photo in
-                    // Corrige orientação antes de salvar
                     let orientationFixedPhoto = photo.fixOrientation()
-                    
-                    if let data = orientationFixedPhoto.pngData() ?? orientationFixedPhoto.jpegData(compressionQuality: 1.0) {
-                        let ext = detectImageExtension(data: data)
+                    // Tenta salvar como HEIC, depois JPG, depois PNG
+                    var data: Data? = nil
+                    var ext: String = "heic"
+                    if let heicData = exportUIImageAsHEIC(orientationFixedPhoto) {
+                        data = heicData
+                        ext = "heic"
+                    } else if let jpgData = orientationFixedPhoto.jpegData(compressionQuality: 1.0) {
+                        data = jpgData
+                        ext = "jpg"
+                    } else if let pngData = orientationFixedPhoto.pngData() {
+                        data = pngData
+                        ext = "png"
+                    }
+                    if let data {
                         let filename = "photo_\(UUID().uuidString).\(ext)"
                         let url = getPhotoStorageDir().appendingPathComponent(filename)
                         try? FileManager.default.createDirectory(at: getPhotoStorageDir(), withIntermediateDirectories: true)
