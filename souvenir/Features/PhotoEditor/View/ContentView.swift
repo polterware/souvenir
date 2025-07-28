@@ -19,6 +19,7 @@ func exportUIImageAsHEIC(_ image: UIImage) -> Data? {
 }
 
 struct ContentView: View {
+    @State private var isImporting: Bool = false
     struct StoredPhoto: Codable {
         let url: URL
         let data: Data
@@ -90,61 +91,81 @@ struct ContentView: View {
                         showCamera = true
                     }
                 }
+
+                if isImporting {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                    ProgressView("Importando fotos...")
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .foregroundColor(.white)
+                        .padding(40)
+                        .background(Color.black.opacity(0.7))
+                        .cornerRadius(16)
+                }
             }
             .onChange(of: selectedItems) { _, newItems in
-                Task {
+                isImporting = true
+                DispatchQueue.global(qos: .userInitiated).async {
                     var importedPhotos: [StoredPhoto] = []
                     let storageDir = getPhotoStorageDir()
                     try? FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
+                    let group = DispatchGroup()
                     for item in newItems {
-                        if let data = try? await item.loadTransferable(type: Data.self) {
-                            if let img = loadUIImageFullQuality(from: data) {
-                                let ext = detectImageExtension(data: data)
-                                let filename: String
-                                let url: URL
-                                var outData: Data? = nil
-                                var outExt: String = ext
-                                switch ext {
-                                case "heic":
-                                    if let heicData = exportUIImageAsHEIC(img) {
-                                        outData = heicData
-                                        outExt = "heic"
+                        group.enter()
+                        Task {
+                            if let data = try? await item.loadTransferable(type: Data.self) {
+                                if let img = loadUIImageFullQuality(from: data) {
+                                    let ext = detectImageExtension(data: data)
+                                    let filename: String
+                                    let url: URL
+                                    var outData: Data? = nil
+                                    var outExt: String = ext
+                                    switch ext {
+                                    case "heic":
+                                        if let heicData = exportUIImageAsHEIC(img) {
+                                            outData = heicData
+                                            outExt = "heic"
+                                        }
+                                    case "jpg":
+                                        if let jpgData = img.jpegData(compressionQuality: 1.0) {
+                                            outData = jpgData
+                                            outExt = "jpg"
+                                        }
+                                    case "png":
+                                        if let pngData = img.pngData() {
+                                            outData = pngData
+                                            outExt = "png"
+                                        }
+                                    default:
+                                        // fallback para PNG
+                                        if let pngData = img.pngData() {
+                                            outData = pngData
+                                            outExt = "png"
+                                        }
                                     }
-                                case "jpg":
-                                    if let jpgData = img.jpegData(compressionQuality: 1.0) {
-                                        outData = jpgData
-                                        outExt = "jpg"
+                                    filename = "photo_\(UUID().uuidString).\(outExt)"
+                                    url = storageDir.appendingPathComponent(filename)
+                                    do {
+                                        if let outData {
+                                            try outData.write(to: url)
+                                            importedPhotos.append(StoredPhoto(url: url, data: outData, image: img, originalData: outData))
+                                        }
+                                    } catch {
+                                        print("[Import] Falha ao salvar imagem em: \(url.path)")
                                     }
-                                case "png":
-                                    if let pngData = img.pngData() {
-                                        outData = pngData
-                                        outExt = "png"
-                                    }
-                                default:
-                                    // fallback para PNG
-                                    if let pngData = img.pngData() {
-                                        outData = pngData
-                                        outExt = "png"
-                                    }
-                                }
-                                filename = "photo_\(UUID().uuidString).\(outExt)"
-                                url = storageDir.appendingPathComponent(filename)
-                                do {
-                                    if let outData {
-                                        try outData.write(to: url)
-                                        importedPhotos.append(StoredPhoto(url: url, data: outData, image: img, originalData: outData))
-                                    }
-                                } catch {
-                                    print("[Import] Falha ao salvar imagem em: \(url.path)")
                                 }
                             }
+                            group.leave()
                         }
                     }
-                    if !importedPhotos.isEmpty {
-                        photos.append(contentsOf: importedPhotos)
-                        savePhotos()
+                    group.notify(queue: .main) {
+                        if !importedPhotos.isEmpty {
+                            photos.append(contentsOf: importedPhotos)
+                            savePhotos()
+                        }
+                        selectedItems.removeAll()
+                        isImporting = false
                     }
-                    selectedItems.removeAll()
                 }
             }
             .onAppear {
