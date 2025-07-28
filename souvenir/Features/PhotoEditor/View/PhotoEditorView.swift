@@ -1,9 +1,11 @@
 import SwiftUI
 import UIKit
 
+
 struct PhotoEditorView: View {
     let namespace: Namespace.ID
     let matchedID: String
+    var onFinishEditing: ((UIImage?, PhotoEditState?, Bool) -> Void)? // (finalImage, ajustes, salvou?)
 
     @State private var zoomScale: CGFloat = 1.0
     @State private var lastZoomScale: CGFloat = 1.0
@@ -11,11 +13,18 @@ struct PhotoEditorView: View {
     @State private var selectedCategory: String = "filters"
     @EnvironmentObject private var colorSchemeManager: ColorSchemeManager
     @StateObject private var viewModel: PhotoEditorViewModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var showSaveDiscardModal = false
+    @State private var hasChanges = false
 
-    init(photo: UIImage, namespace: Namespace.ID, matchedID: String) {
+    private var initialEditState: PhotoEditState
+
+    init(photo: UIImage, namespace: Namespace.ID, matchedID: String, initialEditState: PhotoEditState? = nil, onFinishEditing: ((UIImage?, PhotoEditState?, Bool) -> Void)? = nil) {
         _viewModel = StateObject(wrappedValue: PhotoEditorViewModel(image: photo))
         self.namespace = namespace
         self.matchedID = matchedID
+        self.onFinishEditing = onFinishEditing
+        self.initialEditState = initialEditState ?? PhotoEditState()
     }
 
     var body: some View {
@@ -23,20 +32,17 @@ struct PhotoEditorView: View {
             GeometryReader { geometry in
                 VStack(spacing: 0) {
                     PhotoEditorMainImage(
-                        image: $viewModel.previewBase, // mostra a original se não houver preview
+                        image: $viewModel.previewBase,
                         filteredImage: $viewModel.previewImage,
                         matchedID: matchedID,
                         namespace: namespace,
                         zoomScale: $zoomScale,
                         lastZoomScale: $lastZoomScale
                     )
-
                     VStack{
-                        // Menu de conteúdo animado
                         ZStack {
                             switch selectedCategory {
                             case "filters":
-                                // Desabilita filtros por enquanto, pois ViewModel foi refatorado e não tem mais image, previewCache ou applyFilter
                                 Text("Filtros desabilitados nesta versão").padding()
                                     .transition(.move(edge: .bottom).combined(with: .opacity))
                             case "edit":
@@ -66,8 +72,6 @@ struct PhotoEditorView: View {
                             }
                         }
                         .animation(.easeOut(duration: 0.28), value: selectedCategory)
-                        
-                        // Toolbar sempre visível
                         PhotoEditorToolbar(
                             selectedCategory: $selectedCategory,
                             bottomSize: $bottomSize
@@ -78,10 +82,44 @@ struct PhotoEditorView: View {
                     .background(colorSchemeManager.primaryColor)
                     .padding(.bottom, geometry.safeAreaInsets.bottom)
                 }
-                
+            }
+            // Modal de salvar/descartar ao tentar voltar
+            .confirmationDialog("Salvar alterações?", isPresented: $showSaveDiscardModal, titleVisibility: .visible) {
+                Button("Salvar", role: .none) {
+                    let finalImage = viewModel.generateFinalImage()
+                    onFinishEditing?(finalImage, viewModel.editState, true)
+                    dismiss()
+                }
+                Button("Descartar", role: .destructive) {
+                    onFinishEditing?(nil, nil, false)
+                    dismiss()
+                }
+                Button("Cancelar", role: .cancel) {}
+            } message: {
+                Text("Você deseja salvar as alterações feitas nesta edição?")
             }
         }
         .ignoresSafeArea(edges: .bottom)
+        .onAppear {
+            viewModel.editState = initialEditState
+        }
+        .onChange(of: viewModel.editState) { newValue in
+            hasChanges = (newValue != initialEditState)
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button(action: {
+                    if hasChanges {
+                        showSaveDiscardModal = true
+                    } else {
+                        onFinishEditing?(nil, nil, false)
+                        dismiss()
+                    }
+                }) {
+                    Label("Voltar", systemImage: "chevron.left")
+                }
+            }
+        }
     }
 }
 

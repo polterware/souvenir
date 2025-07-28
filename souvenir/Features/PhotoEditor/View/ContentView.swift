@@ -19,15 +19,48 @@ func exportUIImageAsHEIC(_ image: UIImage) -> Data? {
 }
 
 struct ContentView: View {
-    struct StoredPhoto {
+    struct StoredPhoto: Codable {
         let url: URL
         let data: Data
         let image: UIImage
+        let originalData: Data
+        var editState: PhotoEditState? = nil
+
+        enum CodingKeys: String, CodingKey {
+            case url, data, editState, originalData
+        }
+
+        // UIImage não é Codable, então customizamos
+        init(url: URL, data: Data, image: UIImage, originalData: Data, editState: PhotoEditState? = nil) {
+            self.url = url
+            self.data = data
+            self.image = image
+            self.originalData = originalData
+            self.editState = editState
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            url = try container.decode(URL.self, forKey: .url)
+            data = try container.decode(Data.self, forKey: .data)
+            originalData = (try? container.decode(Data.self, forKey: .originalData)) ?? data
+            editState = try container.decodeIfPresent(PhotoEditState.self, forKey: .editState)
+            image = loadUIImageFullQuality(from: data) ?? UIImage()
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(url, forKey: .url)
+            try container.encode(data, forKey: .data)
+            try container.encodeIfPresent(editState, forKey: .editState)
+            try container.encode(originalData, forKey: .originalData)
+        }
     }
     @State private var photos: [StoredPhoto] = []
     @State private var showCamera = false
     @State private var selectedItems: [PhotosPickerItem] = []
     @State private var selectedPhotoForEditor: UIImage? = nil
+    @State private var selectedPhotoIndex: Int? = nil
     @State private var isSelectionActive: Bool = false
 
     @Namespace private var ns
@@ -40,6 +73,7 @@ struct ContentView: View {
                     selectedItems: $selectedItems,
                     ns: ns,
                     onPhotoSelected: { index in
+                        selectedPhotoIndex = index
                         navigateToPhotoEditor(photo: photos[index].image)
                     },
                     onPhotosChanged: {
@@ -98,7 +132,7 @@ struct ContentView: View {
                                 do {
                                     if let outData {
                                         try outData.write(to: url)
-                                        importedPhotos.append(StoredPhoto(url: url, data: outData, image: img))
+                                        importedPhotos.append(StoredPhoto(url: url, data: outData, image: img, originalData: outData))
                                     }
                                 } catch {
                                     print("[Import] Falha ao salvar imagem em: \(url.path)")
@@ -137,7 +171,7 @@ struct ContentView: View {
                         let url = getPhotoStorageDir().appendingPathComponent(filename)
                         try? FileManager.default.createDirectory(at: getPhotoStorageDir(), withIntermediateDirectories: true)
                         try? data.write(to: url)
-                        photos.append(StoredPhoto(url: url, data: data, image: orientationFixedPhoto))
+                        photos.append(StoredPhoto(url: url, data: data, image: orientationFixedPhoto, originalData: data))
                         savePhotos()
                     }
                 })
@@ -150,10 +184,40 @@ struct ContentView: View {
             }
             .navigationDestination(isPresented: Binding<Bool>(
                 get: { selectedPhotoForEditor != nil },
-                set: { if !$0 { selectedPhotoForEditor = nil } }
+                set: { if !$0 { selectedPhotoForEditor = nil; selectedPhotoIndex = nil } }
             )) {
-                if let photo = selectedPhotoForEditor {
-                    PhotoEditorView(photo: photo, namespace: ns, matchedID: "")
+                if let idx = selectedPhotoIndex, photos.indices.contains(idx) {
+                    let stored = photos[idx]
+                    let initialEditState = stored.editState
+                    let originalImage = loadUIImageFullQuality(from: stored.originalData) ?? stored.image
+                    PhotoEditorView(photo: originalImage, namespace: ns, matchedID: "", initialEditState: initialEditState) { finalImage, editState, didSave in
+                        if didSave, let finalImage, let editState {
+                            var data: Data? = nil
+                            var ext = "heic"
+                            if let heicData = exportUIImageAsHEIC(finalImage) {
+                                data = heicData
+                                ext = "heic"
+                            } else if let jpgData = finalImage.jpegData(compressionQuality: 1.0) {
+                                data = jpgData
+                                ext = "jpg"
+                            } else if let pngData = finalImage.pngData() {
+                                data = pngData
+                                ext = "png"
+                            }
+                            if let data {
+                                let filename = "photo_\(UUID().uuidString).\(ext)"
+                                let url = getPhotoStorageDir().appendingPathComponent(filename)
+                                try? FileManager.default.createDirectory(at: getPhotoStorageDir(), withIntermediateDirectories: true)
+                                try? data.write(to: url)
+                                photos[idx] = StoredPhoto(url: url, data: data, image: finalImage, originalData: stored.originalData, editState: editState)
+                                savePhotos()
+                            }
+                        } else if !didSave {
+                            // Descartou alterações: não faz nada
+                        }
+                        selectedPhotoForEditor = nil
+                        selectedPhotoIndex = nil
+                    }
                 }
             }
         }
@@ -183,27 +247,23 @@ struct ContentView: View {
     }
 
     func savePhotos() {
-        // Salva apenas os paths das imagens, não os dados
-        let urls = photos.map { $0.url.path }
-        UserDefaults.standard.set(urls, forKey: "savedPhotoPaths")
+        // Salva paths e ajustes
+        do {
+            let data = try JSONEncoder().encode(photos)
+            UserDefaults.standard.set(data, forKey: "savedPhotos")
+        } catch {
+            print("[savePhotos] Falha ao salvar fotos: \(error)")
+        }
     }
 
     func loadPhotos() {
-        var loaded: [StoredPhoto] = []
-        var validPaths: [String] = []
-        if let paths = UserDefaults.standard.array(forKey: "savedPhotoPaths") as? [String] {
-            for path in paths {
-                let url = URL(fileURLWithPath: path)
-                if let data = try? Data(contentsOf: url), let img = loadUIImageFullQuality(from: data) {
-                    loaded.append(StoredPhoto(url: url, data: data, image: img))
-                    validPaths.append(path)
-                }
+        if let data = UserDefaults.standard.data(forKey: "savedPhotos") {
+            do {
+                let loaded = try JSONDecoder().decode([StoredPhoto].self, from: data)
+                photos = loaded
+            } catch {
+                print("[loadPhotos] Falha ao carregar fotos: \(error)")
             }
-        }
-        photos = loaded
-        // Remove paths inválidos do UserDefaults
-        if let paths = UserDefaults.standard.array(forKey: "savedPhotoPaths") as? [String], paths != validPaths {
-            UserDefaults.standard.set(validPaths, forKey: "savedPhotoPaths")
         }
     }
 }
