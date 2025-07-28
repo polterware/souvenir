@@ -364,7 +364,7 @@ private struct ContrastSlider: View {
             step: 1.0,
             tickSpacing: 16,
             majorTickEvery: 10,
-            format: { String(format: "%.2f", ($0 / 100) + 0.5) }
+            format: { String(format: "%d", Int($0 - 50) * 2) } // -100 a 100
         )
     }
 }
@@ -382,7 +382,7 @@ private struct BrightnessSlider: View {
             step: 1.0,
             tickSpacing: 16,
             majorTickEvery: 10,
-            format: { String(format: "%+.2f", ($0 / 100) - 0.5) }
+            format: { String(format: "%d", Int($0 - 50) * 2) } // -100 a 100
         )
     }
 }
@@ -400,7 +400,7 @@ private struct ExposureSlider: View {
             step: 1.0,
             tickSpacing: 16,
             majorTickEvery: 10,
-            format: { String(format: "%+.1f", ($0 / 25) - 2.0) }
+            format: { String(format: "%d", Int($0 - 50) * 2) } // -100 a 100
         )
     }
 }
@@ -418,7 +418,7 @@ private struct SaturationSlider: View {
             step: 1.0,
             tickSpacing: 16,
             majorTickEvery: 10,
-            format: { String(format: "%.2f", $0 / 50) }
+            format: { String(format: "%d", Int($0) * 2 - 100) } // -100 a 100
         )
     }
 }
@@ -436,7 +436,7 @@ private struct VibranceSlider: View {
             step: 1.0,
             tickSpacing: 16,
             majorTickEvery: 10,
-            format: { String(format: "%+.2f", ($0 / 50) - 1.0) }
+            format: { String(format: "%d", Int($0 - 50) * 2) } // -100 a 100
         )
     }
 }
@@ -454,7 +454,7 @@ private struct OpacitySlider: View {
             step: 1.0,
             tickSpacing: 16,
             majorTickEvery: 10,
-            format: { String(format: "%.2f", $0 / 100) }
+            format: { String(format: "%d", 100 - Int($0)) } // 100 a 0
         )
     }
 }
@@ -486,7 +486,7 @@ private struct PixelateSlider: View {
             step: 1.0,
             tickSpacing: 12,
             majorTickEvery: 10,
-            format: { String(format: "%.0f", ($0 * (39.0 / 100.0)) + 1.0) }
+            format: { String(format: "%d", Int($0) * 2 - 100) } // -100 a 100
         )
     }
 }
@@ -504,7 +504,7 @@ private struct ColorTintSlider: View {
             step: 1.0,
             tickSpacing: 16,
             majorTickEvery: 10,
-            format: { String(format: "%.2f", $0 * (6.0 / 100.0)) }
+            format: { String(format: "%d", Int($0) * 2 - 100) } // -100 a 100
         )
     }
 }
@@ -526,7 +526,7 @@ private struct DuotoneShadowIntensitySlider: View {
                 step: 1.0,
                 tickSpacing: 16,
                 majorTickEvery: 10,
-                format: { String(format: "%.2f", $0 / 50) }
+            format: { String(format: "%d", Int($0) * 2 - 100) } // -100 a 100
             )
         }
     }
@@ -549,7 +549,7 @@ private struct DuotoneHighlightIntensitySlider: View {
                 step: 1.0,
                 tickSpacing: 16,
                 majorTickEvery: 10,
-                format: { String(format: "%.2f", $0 / 50) }
+            format: { String(format: "%d", Int($0) * 2 - 100) } // -100 a 100
             )
         }
     }
