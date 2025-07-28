@@ -72,11 +72,11 @@ struct ContentView: View {
                 VStack(spacing: 0) {
                     Image("logo")
                         .resizable()
-                        .scaledToFit()
-                        .frame(height: 48)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxWidth: .infinity, minHeight: 48, maxHeight: 80)
+                        .padding(.horizontal, 24)
                         .padding(.top, 16)
-                        .padding(.bottom, 6)
-                        .padding(.horizontal, 20)
+                        .padding(.bottom, 4)
                     PhotosScrollView(
                         photos: $photos,
                         selectedItems: $selectedItems,
