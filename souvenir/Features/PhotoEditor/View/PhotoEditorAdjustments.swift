@@ -47,7 +47,7 @@ struct RulerSlider: View {
             ZStack(alignment: .leading) {
                 // Ruler
                 HStack(spacing: 0) {
-                    ForEach(minValue...maxValue, id: \.self) { i in
+                    ForEach(minValue...maxValue, id: \ .self) { i in
                         let tickValue = Float(i) * step
                         Rectangle()
                             .fill(i % majorTickEvery == 0 ? Color.primary : Color.secondary.opacity(0.5))
@@ -78,7 +78,7 @@ struct RulerSlider: View {
                                 isDragging = true
                                 let sliderWidth = geo.size.width - thumbSize
                                 let percent = max(0, min(1, (gesture.location.x - thumbSize/2) / sliderWidth))
-                                let rawValue = percent * valueRange + range.lowerBound
+                                let rawValue = Float(percent) * valueRange + range.lowerBound
                                 let snapped = (rawValue / step).rounded() * step
                                 let clamped = min(max(snapped, range.lowerBound), range.upperBound)
                                 let intValue = Int(clamped / step)
@@ -345,9 +345,9 @@ private struct ContrastSlider: View {
             value: $value,
             range: 0.5...1.5,
             step: 0.1,
-            format: { String(format: "%.2f", $0) },
             tickSpacing: 16,
-            majorTickEvery: 5
+            majorTickEvery: 5,
+            format: { String(format: "%.2f", $0) }
         )
     }
 }
@@ -359,9 +359,9 @@ private struct BrightnessSlider: View {
             value: $value,
             range: -0.5...0.5,
             step: 0.1,
-            format: { String(format: "%+.2f", $0) },
             tickSpacing: 16,
-            majorTickEvery: 5
+            majorTickEvery: 5,
+            format: { String(format: "%+.2f", $0) }
         )
     }
 }
@@ -373,9 +373,9 @@ private struct ExposureSlider: View {
             value: $value,
             range: -2.0...2.0,
             step: 0.1,
-            format: { String(format: "%+.1f", $0) },
             tickSpacing: 16,
-            majorTickEvery: 5
+            majorTickEvery: 5,
+            format: { String(format: "%+.1f", $0) }
         )
     }
 }
@@ -387,9 +387,9 @@ private struct SaturationSlider: View {
             value: $value,
             range: 0.0...2.0,
             step: 0.1,
-            format: { String(format: "%.2f", $0) },
             tickSpacing: 16,
-            majorTickEvery: 5
+            majorTickEvery: 5,
+            format: { String(format: "%.2f", $0) }
         )
     }
 }
@@ -401,9 +401,9 @@ private struct VibranceSlider: View {
             value: $value,
             range: -1.0...1.0,
             step: 0.1,
-            format: { String(format: "%+.2f", $0) },
             tickSpacing: 16,
-            majorTickEvery: 5
+            majorTickEvery: 5,
+            format: { String(format: "%+.2f", $0) }
         )
     }
 }
@@ -415,9 +415,9 @@ private struct OpacitySlider: View {
             value: $value,
             range: 0.0...1.0,
             step: 0.01,
-            format: { String(format: "%.2f", $0) },
             tickSpacing: 16,
-            majorTickEvery: 10
+            majorTickEvery: 10,
+            format: { String(format: "%.2f", $0) }
         )
     }
 }
@@ -429,9 +429,9 @@ private struct ColorInvertSlider: View {
             value: $value,
             range: 0.0...1.0,
             step: 0.01,
-            format: { String(format: "%.2f", $0) },
             tickSpacing: 16,
-            majorTickEvery: 10
+            majorTickEvery: 10,
+            format: { String(format: "%.2f", $0) }
         )
     }
 }
@@ -443,9 +443,9 @@ private struct PixelateSlider: View {
             value: $value,
             range: 1.0...40.0,
             step: 1.0,
-            format: { String(format: "%.0f", $0) },
             tickSpacing: 12,
-            majorTickEvery: 5
+            majorTickEvery: 5,
+            format: { String(format: "%.0f", $0) }
         )
     }
 }
@@ -457,9 +457,9 @@ private struct ColorTintSlider: View {
             value: $value,
             range: 0.0...6.0,
             step: 0.1,
-            format: { String(format: "%.2f", $0) },
             tickSpacing: 16,
-            majorTickEvery: 6
+            majorTickEvery: 6,
+            format: { String(format: "%.2f", $0) }
         )
     }
 }
@@ -475,9 +475,9 @@ private struct DuotoneShadowIntensitySlider: View {
                 value: $value,
                 range: 0.0...2.0,
                 step: 0.01,
-                format: { String(format: "%.2f", $0) },
                 tickSpacing: 16,
-                majorTickEvery: 4
+                majorTickEvery: 4,
+                format: { String(format: "%.2f", $0) }
             )
         }
     }
@@ -494,9 +494,9 @@ private struct DuotoneHighlightIntensitySlider: View {
                 value: $value,
                 range: 0.0...2.0,
                 step: 0.01,
-                format: { String(format: "%.2f", $0) },
                 tickSpacing: 16,
-                majorTickEvery: 4
+                majorTickEvery: 4,
+                format: { String(format: "%.2f", $0) }
             )
         }
     }
