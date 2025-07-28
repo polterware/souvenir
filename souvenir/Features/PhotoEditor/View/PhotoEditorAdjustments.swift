@@ -37,11 +37,13 @@ struct RulerSlider: View {
 
     var body: some View {
         GeometryReader { geo in
+            // Ajusta range para sempre terminar em major tick
+            let tickCount = Int((range.upperBound - range.lowerBound) / step)
+            let adjustedMax = range.lowerBound + Float((tickCount / majorTickEvery) * majorTickEvery) * step
             let minValue = Int(range.lowerBound / step)
-            let maxValue = Int(range.upperBound / step)
-            let totalTicks = maxValue - minValue
+            let maxValue = Int(adjustedMax / step)
             let sliderWidth = geo.size.width - thumbSize
-            let valueRange = range.upperBound - range.lowerBound
+            let valueRange = adjustedMax - range.lowerBound
             let percent = CGFloat((value - range.lowerBound) / valueRange)
             let currentX = percent * sliderWidth
             ZStack(alignment: .leading) {
@@ -60,13 +62,14 @@ struct RulerSlider: View {
                 .frame(height: rulerHeight)
                 .padding(.horizontal, thumbSize/2)
                 // Thumb
-                Circle()
+                RoundedRectangle(cornerRadius: thumbSize / 2.5, style: .continuous)
                     .fill(Color.accentColor)
-                    .frame(width: thumbSize, height: thumbSize)
+                    .frame(width: thumbSize * 1.2, height: thumbSize)
                     .overlay(
                         Text(format(value))
                             .font(.caption2.bold())
                             .foregroundColor(.white)
+                            .frame(width: thumbSize * 1.2, height: thumbSize)
                     )
                     .offset(x: currentX)
                     .gesture(
@@ -79,11 +82,20 @@ struct RulerSlider: View {
                                 let sliderWidth = geo.size.width - thumbSize
                                 let percent = max(0, min(1, (gesture.location.x - thumbSize/2) / sliderWidth))
                                 let rawValue = Float(percent) * valueRange + range.lowerBound
-                                let snapped = (rawValue / step).rounded() * step
-                                let clamped = min(max(snapped, range.lowerBound), range.upperBound)
+                                // Snap forte nos major ticks
+                                let majorTickStep = step * Float(majorTickEvery)
+                                let nearestMajor = (rawValue / majorTickStep).rounded() * majorTickStep
+                                let snapThreshold: Float = step * 2 // snap mais forte para major
+                                let snapped: Float
+                                if abs(rawValue - nearestMajor) < snapThreshold {
+                                    snapped = nearestMajor
+                                } else {
+                                    snapped = (rawValue / step).rounded() * step
+                                }
+                                let clamped = min(max(snapped, range.lowerBound), adjustedMax)
                                 let intValue = Int(clamped / step)
                                 if intValue != lastFeedbackValue {
-                                    let generator = UIImpactFeedbackGenerator(style: .light)
+                                    let generator = UIImpactFeedbackGenerator(style: (abs(clamped - nearestMajor) < 0.01) ? .medium : .light)
                                     generator.impactOccurred()
                                     lastFeedbackValue = intValue
                                 }
@@ -342,13 +354,17 @@ struct PhotoEditorAdjustments: View {
 private struct ContrastSlider: View {
     @Binding var value: Float
     var body: some View {
+        // Mapeia 0...100 para 0.5...1.5
         RulerSlider(
-            value: $value,
-            range: 0.5...1.5,
-            step: 0.1,
+            value: Binding(
+                get: { ((value - 0.5) * 100).rounded() },
+                set: { value = ($0 / 100) + 0.5 }
+            ),
+            range: 0...100,
+            step: 1.0,
             tickSpacing: 16,
-            majorTickEvery: 5,
-            format: { String(format: "%.2f", $0) }
+            majorTickEvery: 10,
+            format: { String(format: "%.2f", ($0 / 100) + 0.5) }
         )
     }
 }
@@ -356,13 +372,17 @@ private struct ContrastSlider: View {
 private struct BrightnessSlider: View {
     @Binding var value: Float
     var body: some View {
+        // Mapeia 0...100 para -0.5...0.5
         RulerSlider(
-            value: $value,
-            range: -0.5...0.5,
-            step: 0.1,
+            value: Binding(
+                get: { ((value + 0.5) * 100).rounded() },
+                set: { value = ($0 / 100) - 0.5 }
+            ),
+            range: 0...100,
+            step: 1.0,
             tickSpacing: 16,
-            majorTickEvery: 5,
-            format: { String(format: "%+.2f", $0) }
+            majorTickEvery: 10,
+            format: { String(format: "%+.2f", ($0 / 100) - 0.5) }
         )
     }
 }
@@ -370,13 +390,17 @@ private struct BrightnessSlider: View {
 private struct ExposureSlider: View {
     @Binding var value: Float
     var body: some View {
+        // Mapeia 0...100 para -2.0...2.0
         RulerSlider(
-            value: $value,
-            range: -2.0...2.0,
-            step: 0.1,
+            value: Binding(
+                get: { ((value + 2.0) * 25).rounded() },
+                set: { value = ($0 / 25) - 2.0 }
+            ),
+            range: 0...100,
+            step: 1.0,
             tickSpacing: 16,
-            majorTickEvery: 5,
-            format: { String(format: "%+.1f", $0) }
+            majorTickEvery: 10,
+            format: { String(format: "%+.1f", ($0 / 25) - 2.0) }
         )
     }
 }
@@ -384,13 +408,17 @@ private struct ExposureSlider: View {
 private struct SaturationSlider: View {
     @Binding var value: Float
     var body: some View {
+        // Mapeia 0...100 para 0.0...2.0
         RulerSlider(
-            value: $value,
-            range: 0.0...2.0,
-            step: 0.1,
+            value: Binding(
+                get: { (value * 50).rounded() },
+                set: { value = $0 / 50 }
+            ),
+            range: 0...100,
+            step: 1.0,
             tickSpacing: 16,
-            majorTickEvery: 5,
-            format: { String(format: "%.2f", $0) }
+            majorTickEvery: 10,
+            format: { String(format: "%.2f", $0 / 50) }
         )
     }
 }
@@ -398,13 +426,17 @@ private struct SaturationSlider: View {
 private struct VibranceSlider: View {
     @Binding var value: Float
     var body: some View {
+        // Mapeia 0...100 para -1.0...1.0
         RulerSlider(
-            value: $value,
-            range: -1.0...1.0,
-            step: 0.1,
+            value: Binding(
+                get: { ((value + 1.0) * 50).rounded() },
+                set: { value = ($0 / 50) - 1.0 }
+            ),
+            range: 0...100,
+            step: 1.0,
             tickSpacing: 16,
-            majorTickEvery: 5,
-            format: { String(format: "%+.2f", $0) }
+            majorTickEvery: 10,
+            format: { String(format: "%+.2f", ($0 / 50) - 1.0) }
         )
     }
 }
@@ -412,13 +444,17 @@ private struct VibranceSlider: View {
 private struct OpacitySlider: View {
     @Binding var value: Float
     var body: some View {
+        // Mapeia 0...100 para 0.0...1.0
         RulerSlider(
-            value: $value,
-            range: 0.0...1.0,
-            step: 0.01,
+            value: Binding(
+                get: { (value * 100).rounded() },
+                set: { value = $0 / 100 }
+            ),
+            range: 0...100,
+            step: 1.0,
             tickSpacing: 16,
             majorTickEvery: 10,
-            format: { String(format: "%.2f", $0) }
+            format: { String(format: "%.2f", $0 / 100) }
         )
     }
 }
@@ -440,13 +476,17 @@ private struct ColorInvertSlider: View {
 private struct PixelateSlider: View {
     @Binding var value: Float
     var body: some View {
+        // Mapeia 0...100 para 1.0...40.0
         RulerSlider(
-            value: $value,
-            range: 1.0...40.0,
+            value: Binding(
+                get: { ((value - 1.0) * (100.0 / 39.0)).rounded() },
+                set: { value = ($0 * (39.0 / 100.0)) + 1.0 }
+            ),
+            range: 0...100,
             step: 1.0,
             tickSpacing: 12,
-            majorTickEvery: 5,
-            format: { String(format: "%.0f", $0) }
+            majorTickEvery: 10,
+            format: { String(format: "%.0f", ($0 * (39.0 / 100.0)) + 1.0) }
         )
     }
 }
@@ -454,13 +494,17 @@ private struct PixelateSlider: View {
 private struct ColorTintSlider: View {
     @Binding var value: Float
     var body: some View {
+        // Mapeia 0...100 para 0.0...6.0
         RulerSlider(
-            value: $value,
-            range: 0.0...6.0,
-            step: 0.1,
+            value: Binding(
+                get: { (value * (100.0 / 6.0)).rounded() },
+                set: { value = $0 * (6.0 / 100.0) }
+            ),
+            range: 0...100,
+            step: 1.0,
             tickSpacing: 16,
-            majorTickEvery: 6,
-            format: { String(format: "%.2f", $0) }
+            majorTickEvery: 10,
+            format: { String(format: "%.2f", $0 * (6.0 / 100.0)) }
         )
     }
 }
@@ -472,13 +516,17 @@ private struct DuotoneShadowIntensitySlider: View {
             Text("Intensidade Sombras")
                 .font(.caption)
                 .foregroundColor(.secondary)
+            // Mapeia 0...100 para 0.0...2.0
             RulerSlider(
-                value: $value,
-                range: 0.0...2.0,
-                step: 0.01,
+                value: Binding(
+                    get: { (value * 50).rounded() },
+                    set: { value = $0 / 50 }
+                ),
+                range: 0...100,
+                step: 1.0,
                 tickSpacing: 16,
-                majorTickEvery: 4,
-                format: { String(format: "%.2f", $0) }
+                majorTickEvery: 10,
+                format: { String(format: "%.2f", $0 / 50) }
             )
         }
     }
@@ -491,13 +539,17 @@ private struct DuotoneHighlightIntensitySlider: View {
             Text("Intensidade Destaques")
                 .font(.caption)
                 .foregroundColor(.secondary)
+            // Mapeia 0...100 para 0.0...2.0
             RulerSlider(
-                value: $value,
-                range: 0.0...2.0,
-                step: 0.01,
+                value: Binding(
+                    get: { (value * 50).rounded() },
+                    set: { value = $0 / 50 }
+                ),
+                range: 0...100,
+                step: 1.0,
                 tickSpacing: 16,
-                majorTickEvery: 4,
-                format: { String(format: "%.2f", $0) }
+                majorTickEvery: 10,
+                format: { String(format: "%.2f", $0 / 50) }
             )
         }
     }
