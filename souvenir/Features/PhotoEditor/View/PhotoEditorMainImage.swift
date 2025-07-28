@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct PhotoEditorMainImage: View {
+    // Removido: estados de zoom/pan manual
     @Binding var image: UIImage?
     @Binding var filteredImage: UIImage?
     let matchedID: String
@@ -20,38 +21,20 @@ struct PhotoEditorMainImage: View {
             if let filtered = filteredImage {
                 Image(uiImage: filtered)
                     .resizable()
+                    .interpolation(.high)
                     .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
                     .scaledToFit()
-                    .scaleEffect(zoomScale)
-                    .gesture(
-                        MagnificationGesture()
-                            .onChanged { value in
-                                let newScale = lastZoomScale * value
-                                zoomScale = min(max(newScale, 1.0), 3.0)
-                            }
-                            .onEnded { _ in
-                                lastZoomScale = zoomScale
-                            }
-                    )
                     .cornerRadius(20)
-                    .animation(nil, value: filtered) // Evita flicker/swiftui animation
+                    .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
+                    .animation(nil, value: filtered)
             } else if let original = image {
                 Image(uiImage: original)
                     .resizable()
+                    .interpolation(.high)
                     .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
                     .scaledToFit()
-                    .scaleEffect(zoomScale)
-                    .gesture(
-                        MagnificationGesture()
-                            .onChanged { value in
-                                let newScale = lastZoomScale * value
-                                zoomScale = min(max(newScale, 1.0), 3.0)
-                            }
-                            .onEnded { _ in
-                                lastZoomScale = zoomScale
-                            }
-                    )
                     .cornerRadius(20)
+                    .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
             } else {
                 Text("Carregue ou selecione uma imagem para editar")
                     .font(.headline)
@@ -60,5 +43,11 @@ struct PhotoEditorMainImage: View {
         }
         .padding(.horizontal)
         .frame(maxHeight: .infinity)
+    }
+}
+
+private extension CGRect {
+    var center: CGPoint {
+        CGPoint(x: midX, y: midY)
     }
 }

@@ -38,9 +38,12 @@ struct ContentView: View {
             .onChange(of: selectedItems) { _, newItems in
                 Task {
                     for item in newItems {
-                        if let data = try? await item.loadTransferable(type: Data.self),
-                           let uiImage = UIImage(data: data)?.fixOrientation().withAlpha() {
-                            photos.append(uiImage)
+                        if let data = try? await item.loadTransferable(type: Data.self) {
+                            // Usa o scale da tela para máxima qualidade
+                            let uiImage = UIImage(data: data, scale: UIScreen.main.scale)?.fixOrientation().withAlpha()
+                            if let img = uiImage {
+                                photos.append(img)
+                            }
                         }
                     }
                     savePhotos()
@@ -106,7 +109,7 @@ struct ContentView: View {
     func loadPhotos() {
         if let data = UserDefaults.standard.array(forKey: "savedPhotos") as? [Data] {
             photos = data.compactMap { 
-                if let loadedImage = UIImage(data: $0) {
+                if let loadedImage = UIImage(data: $0, scale: UIScreen.main.scale) {
                     return loadedImage.fixOrientation().withAlpha()
                 }
                 return nil
