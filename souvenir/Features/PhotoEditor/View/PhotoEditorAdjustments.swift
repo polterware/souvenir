@@ -99,6 +99,7 @@ struct RulerSlider: View {
             .frame(height: sliderHeight)
         }
         .frame(height: sliderHeight)
+        .boxBlankStyle(cornerRadius: 12, padding: 6)
     }
 }
 //
