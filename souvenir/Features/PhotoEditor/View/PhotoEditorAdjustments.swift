@@ -1,3 +1,106 @@
+// Slider customizado com régua, snap e feedback tátil
+struct RulerSlider: View {
+    @Binding var value: Float
+    let range: ClosedRange<Float>
+    let step: Float
+    let format: (Float) -> String
+    let tickSpacing: CGFloat
+    let majorTickEvery: Int
+    let thumbSize: CGFloat
+    let rulerHeight: CGFloat
+    let sliderHeight: CGFloat
+    @GestureState private var dragOffset: CGFloat = 0
+    @State private var isDragging = false
+    @State private var lastFeedbackValue: Int? = nil
+
+    init(
+        value: Binding<Float>,
+        range: ClosedRange<Float>,
+        step: Float = 1.0,
+        tickSpacing: CGFloat = 12,
+        majorTickEvery: Int = 5,
+        thumbSize: CGFloat = 28,
+        rulerHeight: CGFloat = 18,
+        sliderHeight: CGFloat = 44,
+        format: @escaping (Float) -> String = { String(format: "%.0f", $0) }
+    ) {
+        self._value = value
+        self.range = range
+        self.step = step
+        self.tickSpacing = tickSpacing
+        self.majorTickEvery = majorTickEvery
+        self.thumbSize = thumbSize
+        self.rulerHeight = rulerHeight
+        self.sliderHeight = sliderHeight
+        self.format = format
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let minValue = Int(range.lowerBound / step)
+            let maxValue = Int(range.upperBound / step)
+            let totalTicks = maxValue - minValue
+            let sliderWidth = geo.size.width - thumbSize
+            let valueRange = range.upperBound - range.lowerBound
+            let percent = CGFloat((value - range.lowerBound) / valueRange)
+            let currentX = percent * sliderWidth
+            ZStack(alignment: .leading) {
+                // Ruler
+                HStack(spacing: 0) {
+                    ForEach(minValue...maxValue, id: \.self) { i in
+                        let tickValue = Float(i) * step
+                        Rectangle()
+                            .fill(i % majorTickEvery == 0 ? Color.primary : Color.secondary.opacity(0.5))
+                            .frame(width: 2, height: i % majorTickEvery == 0 ? rulerHeight : rulerHeight * 0.6)
+                        if i != maxValue {
+                            Spacer(minLength: tickSpacing - 2)
+                        }
+                    }
+                }
+                .frame(height: rulerHeight)
+                .padding(.horizontal, thumbSize/2)
+                // Thumb
+                Circle()
+                    .fill(Color.accentColor)
+                    .frame(width: thumbSize, height: thumbSize)
+                    .overlay(
+                        Text(format(value))
+                            .font(.caption2.bold())
+                            .foregroundColor(.white)
+                    )
+                    .offset(x: currentX)
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .updating($dragOffset) { value, state, _ in
+                                state = value.translation.width
+                            }
+                            .onChanged { gesture in
+                                isDragging = true
+                                let sliderWidth = geo.size.width - thumbSize
+                                let percent = max(0, min(1, (gesture.location.x - thumbSize/2) / sliderWidth))
+                                let rawValue = percent * valueRange + range.lowerBound
+                                let snapped = (rawValue / step).rounded() * step
+                                let clamped = min(max(snapped, range.lowerBound), range.upperBound)
+                                let intValue = Int(clamped / step)
+                                if intValue != lastFeedbackValue {
+                                    let generator = UIImpactFeedbackGenerator(style: .light)
+                                    generator.impactOccurred()
+                                    lastFeedbackValue = intValue
+                                }
+                                value = clamped
+                            }
+                            .onEnded { _ in
+                                isDragging = false
+                                lastFeedbackValue = nil
+                            }
+                    )
+                    .animation(.easeOut(duration: 0.15), value: value)
+            }
+            .frame(height: sliderHeight)
+        }
+        .frame(height: sliderHeight)
+    }
+}
 //
 //  PhotoEditorAdjustments.swift
 //  souvenir
@@ -238,15 +341,13 @@ struct PhotoEditorAdjustments: View {
 private struct ContrastSlider: View {
     @Binding var value: Float
     var body: some View {
-        SlidingRuler(
-            value: Binding(
-                get: { Double(value) },
-                set: { newValue in value = Float(newValue) }
-            ),
-            in: 0.5...1.5,
-            step: 0.3,
-            snap: .fraction,
-            tick: .fraction
+        RulerSlider(
+            value: $value,
+            range: 0.5...1.5,
+            step: 0.1,
+            format: { String(format: "%.2f", $0) },
+            tickSpacing: 16,
+            majorTickEvery: 5
         )
     }
 }
@@ -254,15 +355,13 @@ private struct ContrastSlider: View {
 private struct BrightnessSlider: View {
     @Binding var value: Float
     var body: some View {
-        SlidingRuler(
-            value: Binding(
-                get: { Double(value) },
-                set: { newValue in value = Float(newValue) }
-            ),
-            in: -0.5...0.5,
+        RulerSlider(
+            value: $value,
+            range: -0.5...0.5,
             step: 0.1,
-            snap: .fraction,
-            tick: .fraction
+            format: { String(format: "%+.2f", $0) },
+            tickSpacing: 16,
+            majorTickEvery: 5
         )
     }
 }
@@ -270,15 +369,13 @@ private struct BrightnessSlider: View {
 private struct ExposureSlider: View {
     @Binding var value: Float
     var body: some View {
-        SlidingRuler(
-            value: Binding(
-                get: { Double(value) },
-                set: { newValue in value = Float(newValue) }
-            ),
-            in: -2.0...2.0,
-            step: 0.5,
-            snap: .fraction,
-            tick: .fraction
+        RulerSlider(
+            value: $value,
+            range: -2.0...2.0,
+            step: 0.1,
+            format: { String(format: "%+.1f", $0) },
+            tickSpacing: 16,
+            majorTickEvery: 5
         )
     }
 }
@@ -286,15 +383,13 @@ private struct ExposureSlider: View {
 private struct SaturationSlider: View {
     @Binding var value: Float
     var body: some View {
-        SlidingRuler(
-            value: Binding(
-                get: { Double(value) },
-                set: { newValue in value = Float(newValue) }
-            ),
-            in: 0.0...2.0,
-            step: 0.5,
-            snap: .fraction,
-            tick: .fraction
+        RulerSlider(
+            value: $value,
+            range: 0.0...2.0,
+            step: 0.1,
+            format: { String(format: "%.2f", $0) },
+            tickSpacing: 16,
+            majorTickEvery: 5
         )
     }
 }
@@ -302,15 +397,13 @@ private struct SaturationSlider: View {
 private struct VibranceSlider: View {
     @Binding var value: Float
     var body: some View {
-        SlidingRuler(
-            value: Binding(
-                get: { Double(value) },
-                set: { newValue in value = Float(newValue) }
-            ),
-            in: -1.0...1.0,
+        RulerSlider(
+            value: $value,
+            range: -1.0...1.0,
             step: 0.1,
-            snap: .fraction,
-            tick: .fraction
+            format: { String(format: "%+.2f", $0) },
+            tickSpacing: 16,
+            majorTickEvery: 5
         )
     }
 }
@@ -318,15 +411,13 @@ private struct VibranceSlider: View {
 private struct OpacitySlider: View {
     @Binding var value: Float
     var body: some View {
-        SlidingRuler(
-            value: Binding(
-                get: { Double(value) },
-                set: { newValue in value = Float(newValue) }
-            ),
-            in: 0.0...1.0,
-            step: 0.1,
-            snap: .fraction,
-            tick: .fraction
+        RulerSlider(
+            value: $value,
+            range: 0.0...1.0,
+            step: 0.01,
+            format: { String(format: "%.2f", $0) },
+            tickSpacing: 16,
+            majorTickEvery: 10
         )
     }
 }
@@ -334,15 +425,13 @@ private struct OpacitySlider: View {
 private struct ColorInvertSlider: View {
     @Binding var value: Float
     var body: some View {
-        SlidingRuler(
-            value: Binding(
-                get: { Double(value) },
-                set: { newValue in value = Float(newValue) }
-            ),
-            in: 0.0...1.0,
-            step: 0.1,
-            snap: .fraction,
-            tick: .fraction
+        RulerSlider(
+            value: $value,
+            range: 0.0...1.0,
+            step: 0.01,
+            format: { String(format: "%.2f", $0) },
+            tickSpacing: 16,
+            majorTickEvery: 10
         )
     }
 }
@@ -350,15 +439,13 @@ private struct ColorInvertSlider: View {
 private struct PixelateSlider: View {
     @Binding var value: Float
     var body: some View {
-        SlidingRuler(
-            value: Binding(
-                get: { Double(value) },
-                set: { newValue in value = Float(newValue) }
-            ),
-            in: 1.0...40.0,
+        RulerSlider(
+            value: $value,
+            range: 1.0...40.0,
             step: 1.0,
-            snap: .fraction,
-            tick: .fraction
+            format: { String(format: "%.0f", $0) },
+            tickSpacing: 12,
+            majorTickEvery: 5
         )
     }
 }
@@ -366,15 +453,13 @@ private struct PixelateSlider: View {
 private struct ColorTintSlider: View {
     @Binding var value: Float
     var body: some View {
-        SlidingRuler(
-            value: Binding(
-                get: { Double(value) },
-                set: { newValue in value = Float(newValue) }
-            ),
-            in: 0.0...6.0,
-            step: 0.5,
-            snap: .fraction,
-            tick: .fraction
+        RulerSlider(
+            value: $value,
+            range: 0.0...6.0,
+            step: 0.1,
+            format: { String(format: "%.2f", $0) },
+            tickSpacing: 16,
+            majorTickEvery: 6
         )
     }
 }
@@ -386,15 +471,13 @@ private struct DuotoneShadowIntensitySlider: View {
             Text("Intensidade Sombras")
                 .font(.caption)
                 .foregroundColor(.secondary)
-            SlidingRuler(
-                value: Binding(
-                    get: { Double(value) },
-                    set: { newValue in value = Float(newValue) }
-                ),
-                in: 0.0...2.0,
-                step: 0.5,
-                snap: .fraction,
-                tick: .fraction
+            RulerSlider(
+                value: $value,
+                range: 0.0...2.0,
+                step: 0.01,
+                format: { String(format: "%.2f", $0) },
+                tickSpacing: 16,
+                majorTickEvery: 4
             )
         }
     }
@@ -407,15 +490,13 @@ private struct DuotoneHighlightIntensitySlider: View {
             Text("Intensidade Destaques")
                 .font(.caption)
                 .foregroundColor(.secondary)
-            SlidingRuler(
-                value: Binding(
-                    get: { Double(value) },
-                    set: { newValue in value = Float(newValue) }
-                ),
-                in: 0.0...2.0,
-                step: 0.5,
-                snap: .fraction,
-                tick: .fraction
+            RulerSlider(
+                value: $value,
+                range: 0.0...2.0,
+                step: 0.01,
+                format: { String(format: "%.2f", $0) },
+                tickSpacing: 16,
+                majorTickEvery: 4
             )
         }
     }
