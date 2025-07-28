@@ -27,6 +27,7 @@ struct PhotoEditorMainImage: View {
                     .aspectRatio(contentMode: .fit)
                     .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
                     .animation(.none, value: filtered)
+                    .cornerRadius(12)
             } else if let original = image {
                 Image(uiImage: original)
                     .resizable()
@@ -36,6 +37,7 @@ struct PhotoEditorMainImage: View {
                     .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
                     .aspectRatio(contentMode: .fit)
                     .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
+                    .cornerRadius(12)
             } else {
                 Text("Carregue ou selecione uma imagem para editar")
                     .font(.headline)

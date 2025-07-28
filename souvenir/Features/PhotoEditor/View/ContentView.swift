@@ -44,19 +44,28 @@ struct ContentView: View {
             }
             .onChange(of: selectedItems) { _, newItems in
                 Task {
+                    var importedPhotos: [StoredPhoto] = []
+                    let storageDir = getPhotoStorageDir()
+                    try? FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
                     for item in newItems {
                         if let data = try? await item.loadTransferable(type: Data.self) {
                             let ext = detectImageExtension(data: data)
                             let filename = "photo_\(UUID().uuidString).\(ext)"
-                            let url = getPhotoStorageDir().appendingPathComponent(filename)
-                            try? FileManager.default.createDirectory(at: getPhotoStorageDir(), withIntermediateDirectories: true)
-                            try? data.write(to: url)
-                            if let img = loadUIImageFullQuality(from: data) {
-                                photos.append(StoredPhoto(url: url, data: data, image: img))
+                            let url = storageDir.appendingPathComponent(filename)
+                            do {
+                                try data.write(to: url)
+                                if let img = loadUIImageFullQuality(from: data) {
+                                    importedPhotos.append(StoredPhoto(url: url, data: data, image: img))
+                                }
+                            } catch {
+                                print("[Import] Falha ao salvar imagem em: \(url.path)")
                             }
                         }
                     }
-                    savePhotos()
+                    if !importedPhotos.isEmpty {
+                        photos.append(contentsOf: importedPhotos)
+                        savePhotos()
+                    }
                     selectedItems.removeAll()
                 }
             }
@@ -127,15 +136,21 @@ struct ContentView: View {
 
     func loadPhotos() {
         var loaded: [StoredPhoto] = []
+        var validPaths: [String] = []
         if let paths = UserDefaults.standard.array(forKey: "savedPhotoPaths") as? [String] {
             for path in paths {
                 let url = URL(fileURLWithPath: path)
                 if let data = try? Data(contentsOf: url), let img = loadUIImageFullQuality(from: data) {
                     loaded.append(StoredPhoto(url: url, data: data, image: img))
+                    validPaths.append(path)
                 }
             }
         }
         photos = loaded
+        // Remove paths inválidos do UserDefaults
+        if let paths = UserDefaults.standard.array(forKey: "savedPhotoPaths") as? [String], paths != validPaths {
+            UserDefaults.standard.set(validPaths, forKey: "savedPhotoPaths")
+        }
     }
 }
 
