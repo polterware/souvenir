@@ -25,7 +25,6 @@ struct PhotoEditorMainImage: View {
                     .antialiased(true)
                     .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
                     .aspectRatio(contentMode: .fit)
-                    .cornerRadius(20)
                     .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
                     .animation(.none, value: filtered)
             } else if let original = image {
@@ -36,7 +35,6 @@ struct PhotoEditorMainImage: View {
                     .antialiased(true)
                     .matchedGeometryEffect(id: matchedID, in: namespace, isSource: false)
                     .aspectRatio(contentMode: .fit)
-                    .cornerRadius(20)
                     .zoomable(minZoomScale: 1, doubleTapZoomScale: 3)
             } else {
                 Text("Carregue ou selecione uma imagem para editar")
@@ -44,6 +42,7 @@ struct PhotoEditorMainImage: View {
                     .foregroundColor(.gray)
             }
         }
+        .cornerRadius(20)
         .padding(.horizontal)
         .frame(maxHeight: .infinity)
     }
