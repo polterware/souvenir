@@ -76,7 +76,8 @@ extension UIImage {
             return self
         }
         
-        let image = UIImage(cgImage: newCGImage)
+        // Preserva a escala original da imagem
+        let image = UIImage(cgImage: newCGImage, scale: self.scale, orientation: .up)
         os_log("[fixOrientation] Orientação corrigida com sucesso")
         return image
     }
@@ -147,6 +148,7 @@ extension UIImage {
         if alphaInfo != .premultipliedLast && alphaInfo != .premultipliedFirst {
             os_log("[withAlpha] Input was not premultiplied alpha, conversion performed.")
         }
-        return UIImage(cgImage: newCGImage)
+        // Preserva a escala original da imagem
+        return UIImage(cgImage: newCGImage, scale: self.scale, orientation: .up)
     }
 }

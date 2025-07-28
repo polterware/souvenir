@@ -144,20 +144,26 @@ func loadUIImageFullQuality(from data: Data) -> UIImage? {
     guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
         return UIImage(data: data)
     }
-    
+
     // Opções para carregamento com máxima qualidade
     let options: [CFString: Any] = [
         kCGImageSourceShouldAllowFloat: true,
         kCGImageSourceCreateThumbnailFromImageAlways: false,
         kCGImageSourceCreateThumbnailWithTransform: true
     ]
-    
+
     guard let cgImage = CGImageSourceCreateImageAtIndex(source, 0, options as CFDictionary) else {
         return UIImage(data: data)
     }
-    
-    // Preserva a escala original para máxima nitidez
-    return UIImage(cgImage: cgImage, scale: 1.0, orientation: .up)
+
+    // Usa a escala do CGImage se possível, senão da tela
+    let scale: CGFloat
+    if let imageSourceScale = (cgImage.width > 0 && cgImage.height > 0) ? UIScreen.main.scale : nil {
+        scale = imageSourceScale
+    } else {
+        scale = UIScreen.main.scale
+    }
+    return UIImage(cgImage: cgImage, scale: scale, orientation: .up)
 }
 
 // MARK: - Helpers para formato original
